@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מדריך מנחה · סדנה 2 · מהתימה אל הקנווס</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #EEF2F1; }
+  * { box-sizing: border-box; }
+  #root { min-height: 100vh; }
+  .app-loading {
+    min-height: 100vh; display: grid; place-items: center;
+    font-family: 'Heebo', system-ui, sans-serif; color: #3A6B68;
+    font-size: 18px; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div id="root"><div class="app-loading" dir="rtl">טוען את מדריך המנחה…</div></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+
+
+// ===================== DATA =====================
+
+const THEMES = [
+  {
+    id: 1,
+    title: "עדשת סיכון ועדשת פוטנציאל",
+    short: "סיכון מול פוטנציאל",
+    intro:
+      "אותו תלמיד עשוי להיראות דרך שתי עדשות שונות. דרך אחת שואלת כיצד להגן, לייצב ולמנוע הידרדרות. היא מדגישה הגנה, רציפות וצמצום סיכונים. דרך אחרת שואלת כיצד לזהות, לטפח ולהרחיב את מה שכבר קיים בתלמיד. היא מדגישה צמיחה, הזדמנות ופיתוח פוטנציאל. שתי העדשות לגיטימיות ולעיתים נחוצות במקביל, אך לעדשה שבה בוחרים יש השפעה שקטה ומתמשכת על החלטות, שיבוצים והקצאת משאבים.",
+    mobility:
+      "מחקר המוביליות הסובייקטיבית בישראל מצביע על כך שתפיסות של גישת צמיחה עשויות למתן את הקשר בין רקע חברתי נמוך לבין תוצאות הישגיות, וכי האופן שבו מבוגרים ממסגרים תלמידים משפיע גם על האופן שבו תלמידים ממסגרים את עצמם. לכן השאלה אינה רק כיצד להגן על תלמידים, אלא גם כיצד ליצור תנאים שבהם תתפתח אצלם תחושת אפשרות, מסוגלות ותנועה.",
+    above: ["ניסוח בדוחות", "החלטות שיבוץ", "מתן הזדמנות נוספת"],
+    below: [
+      "הנחות יסוד על מי “יכול להצליח”",
+      "האופן שבו הנחות אלה נספגות בתלמידים ומעצבות את תפיסת העצמי שלהם",
+    ],
+    levels: {
+      "פרמטרים": [
+        "אילו משאבים יכולים לתמוך לא רק בייצוב אלא גם בפיתוח פוטנציאל?",
+        "אילו הקצאות יכול הפיקוח לקדם מול מנהלי בתי הספר והפנימיות?",
+      ],
+      "לולאות משוב": [
+        "אילו מנגנונים יכולים לזהות מוקדם חוזקות ולהפוך הצלחה ראשונית להמשך הצלחה?",
+        "איזה תהליך יכול הפיקוח לעודד?",
+      ],
+      "מבנה ועיצוב": [
+        "אילו נהלים, זרימות מידע או מרחבי התארגנות עצמית מסייעים לצוותים לראות גם חוזקות?",
+        "מה הפיקוח יכול להניע?",
+      ],
+      "תכלית וכוונה": [
+        "עד כמה ההגדרה של תלמיד שניתן להצליח איתו גלויה, משותפת ומוסכמת?",
+        "מה תפקיד הפיקוח בעיצוב ההגדרה הזו?",
+      ],
+    },
+    card:
+      "אם השיח נותר ברמה כללית של “צריך להאמין יותר”, הזמינו את המשתתפים לקונקרטי: “ניזכר בהחלטה אמיתית שהשתנתה כאשר העדשה השתנתה, בשיבוץ, בדוח או בהקצאת משאב”.",
+  },
+  {
+    id: 2,
+    title: "אזורים אפורים, צמתים וקשרים",
+    short: "אזורים אפורים",
+    intro:
+      "לאורך שנות הלימוד והשהות ישנם צמתים ותחנות שבהם מתקבלות החלטות מעצבות: בחירת מגמה או מסלול, הצטרפות לחוג או ויתור עליו, השתתפות בפעילות בלתי פורמלית, קבלת תפקיד מנהיגותי, וכן יצירה או היפרמות של קשרים חברתיים משמעותיים. לצד אלה מתקיימים מעברים בין מרחבים שונים, בית ספר, פנימייה, בית והמרחב הבלתי פורמלי, ולעיתים כל גורם רואה רק את החלק שלו ולא את התפר בין המרחבים. כך נוצרים אזורים אפורים, שבהם קל לאבד את הרצף סביב התלמיד ושבהם החלטה אחת עשויה להשפיע על המסלול כולו.",
+    mobility:
+      "סקירת הספרות על חינוך בלתי פורמלי מצביעה על כך שפעילות מובנית, קשר עם מבוגר משמעותי ובניית הון חברתי הם רכיבים שעשויים לתמוך במוביליות לאורך זמן. לכן צומת שאינו מלווה היטב עלול לצמצם אפשרויות, בעוד שצומת שמנוהל ברציפות עשוי לפתוח מסלול.",
+    above: ["שינוי מגמה", "נשירה מחוג", "ירידה בנוכחות", "קשר שנקטע"],
+    below: [
+      "שאלת הבעלות על הרצף",
+      "מי רואה את התלמיד בשלמותו ברגעי מעבר והכרעה",
+    ],
+    levels: {
+      "פרמטרים": [
+        "אילו משאבים מחזקים רציפות וליווי בצמתים?",
+        "באילו מעברים יש לשים דגש מיוחד?",
+        "אילו הקצאות יכול הפיקוח לקדם?",
+      ],
+      "לולאות משוב": [
+        "אילו סימנים יכולים להעיד מוקדם על החלטה שמצמצמת אפשרויות או על קשר שנחלש?",
+        "איזה תהליך יכול הפיקוח לעודד כדי להגיב לכך?",
+      ],
+      "מבנה ועיצוב": [
+        "אילו נהלים, זרימות מידע או צורות התארגנות בין הגורמים והמרחבים יכולות לתמוך בתלמיד בצמתים?",
+        "מה הפיקוח יכול להניע?",
+      ],
+      "תכלית וכוונה": [
+        "עד כמה אנו תופסים את הצמתים והקשרים כרגעים מכוננים למוביליות?",
+        "מה תפקיד הפיקוח בקידום תפיסה זו?",
+      ],
+    },
+    card:
+      "אם הדיון מצטמצם למעברים פורמליים בלבד, הרחיבו: “צומת הוא לא רק מעבר בין כיתות, אלא גם בחירת מגמה, הצטרפות לחוג, קבלת תפקיד או קשר שנשמר או נקטע. אילו מאלה הכי קריטיים אצלנו?”",
+  },
+  {
+    id: 3,
+    title: "מריטוקרטיה, חסמים מבניים והון תרבותי",
+    short: "מריטוקרטיה וחסמים",
+    intro:
+      "מריטוקרטיה היא התפיסה שלפיה מי שמתאמץ מצליח. מחקר המוביליות הסובייקטיבית בישראל מצביע על כך שילדים ובני נוער נוטים לאמץ הסברים אישיים לעוני ולהצלחה, ולעיתים מייחסים משקל נמוך יחסית לחסמים מבניים. כאן נכנסת החשיבה של בורדייה: המערכת נוטה להעדיף, לעיתים מבלי דעת, צורות של הון תרבותי וחברתי שהובאו מהבית, למשל שפה בית ספרית, ביטחון מול סמכות והיכרות עם הקודים של “תלמיד טוב”, ולכן תלמידים שמגיעים בלי קודים אלה עלולים להיתפס בטעות כחלשים או פחות מוכשרים. במקביל, הון חברתי, כלומר רשת קשרים ומנטורים, עשוי לפתוח דלתות ולשפר הזדמנויות לאורך זמן.",
+    mobility:
+      "הספרות על חינוך בלתי פורמלי מדגישה כי הון חברתי, קשרים עם דמויות משמעותיות וחשיפה למסגרות מגוונות יכולים לתמוך במסלול חיים מיטיב. לכן כפר נוער יכול לפעול באופן מכוון לבניית הון תרבותי וחברתי, ולא רק להניח שתלמידים יביאו זאת עמם.",
+    above: ["“התלמיד הזה לא מתאמץ”", "“הוא פחות מתאים”"],
+    below: [
+      "נטייה מערכתית להעריך הון מסוים כטבעי ומובן מאליו",
+      "המרה של חסם מבני בהסבר אישי",
+    ],
+    levels: {
+      "פרמטרים": [
+        "אילו משאבים יכולים לסייע לתלמידים לבנות הון תרבותי וחברתי, כגון חשיפה, מנטורים ושפה אקדמית?",
+        "אילו הקצאות יכול הפיקוח לקדם?",
+      ],
+      "לולאות משוב": [
+        "אילו דפוסים חוזרים ראוי לזהות?",
+        "כיצד אפשר לבנות לולאה חיובית שבה בוגרים מצליחים חוזרים ומחזקים אחרים?",
+        "איזה תהליך יכול הפיקוח לעודד?",
+      ],
+      "מבנה ועיצוב": [
+        "אילו נהלים או יוזמות מהשטח יכולים לבנות הון חברתי?",
+        "מה הפיקוח יכול להניע?",
+      ],
+      "תכלית וכוונה": [
+        "עד כמה הצוות מבחין בין כישלון אישי לבין שעתוק מבני?",
+        "מה תפקיד הפיקוח בקידום שיח כזה?",
+      ],
+    },
+    card:
+      "אם הקבוצה אומרת “צריך ללמד ילדים על חסמים”, הרחיבו פנימה: “איזה הון אנחנו מעריכים כמעט מאליו, ומי מגיע בלעדיו ולכן נראה לנו חלש?”",
+  },
+  {
+    id: 4,
+    title: "השלם גדול מסכום חלקיו",
+    short: "שילוב זרועות בינאגפי",
+    intro:
+      "המינהל נשען על ארבעה תחומי ליבה, שכל אחד מהם רואה היבט אחר בחיי התלמיד: הפיקוח הפדגוגי רואה את הלמידה, ההישגים והתפתחות ההוראה; השירות הפסיכו סוציאלי רואה את המצב הרגשי, המשפחתי והתפקוד הנפשי; הפנימייה רואה את חיי היום יום, הקהילה והחיים המשותפים; ואיתור, קליטה והשמה רואה את ההתאמה בין התלמיד למסגרת ואת תהליך הכניסה אליה. כאשר התחומים פועלים בנפרד, התמונה חלקית. כאשר הם פועלים יחד, עם שפה, מטרה ומידע משותפים, מתהווה הבנה מלאה יותר של מסלול החיים.",
+    mobility:
+      "ספרות על מנהיגות חינוכית ממוקדת צדק מדגישה כי עבודה מערכתית סביב הזדמנות ושוויון, ולא כיחידות נפרדות, יכולה לתמוך בשיפור עקבי בתוצאות של תלמידים מרקע מוחלש. החיבור הבינאגפי מאפשר לזהות, למשל, שתלמיד בעל נטייה טכנולוגית ורגישות רגשית זקוק למסלול שמתייחס לשני הממדים גם יחד.",
+    above: ["ישיבות תיאום", "העברת מידע בסיסי בין התחומים"],
+    below: ["השאלה האם קיימת אחריות משותפת אמיתית על מסלול החיים של התלמיד"],
+    levels: {
+      "פרמטרים": [
+        "אילו מסגרות זמן או משאבים מאפשרים עבודה בינאגפית סדירה?",
+        "אילו מסגרות יכול הפיקוח לקדם?",
+      ],
+      "לולאות משוב": [
+        "אילו מנגנונים מחברים את התחומים כאשר משהו נופל בין הכיסאות?",
+        "כיצד שיתוף הצלחות יכול לחזק את שיתוף הפעולה?",
+        "איזה תהליך יעודד הפיקוח?",
+      ],
+      "מבנה ועיצוב": [
+        "אילו צורות של מידע משותף, נהלים או התארגנות עצמית בין תחומית תומכות במבט משותף בהחלטות מפתח?",
+        "מה הפיקוח יכול להניע?",
+      ],
+      "תכלית וכוונה": [
+        "עד כמה לארבעת האגפים יש מטרת על משותפת סביב מוביליות?",
+        "מה תפקיד הפיקוח בגיבושה?",
+      ],
+    },
+    card:
+      "אם השיח נתקע על “עוד ישיבות”, הרחיבו: “מה ההבדל בין תיאום והעברת מידע לבין אחריות משותפת אמיתית על מסלול החיים של התלמיד?”",
+  },
+  {
+    id: 5,
+    title: "אינדיקטורים למוביליות",
+    short: "אינדיקטורים",
+    intro:
+      "מה שנמדד מקבל לרוב את עיקר תשומת הלב והמשאבים. כיום מקובל למדוד זכאות בגיל 18, אך מוביליות מתבטאת בעיקר בהמשך הדרך, במסלול הלימודים, בהכשרה ובשוק העבודה. לכן מדידה של תוצאות ארוכות טווח נדרשת כדי לראות את התמונה המלאה. מחקרי מוביליות בין דורית בישראל מצביעים גם על כך שתחום הלימוד הוא גורם משמעותי מאוד בקביעת תוצאות כלכליות עתידיות, ולעיתים אף יותר מסוג המוסד שבו לומדים. במיוחד בתחומי STEM יש משקל ניכר ללימודים אקדמיים או למסלולים שמובילים להשתלבות כלכלית מיטיבה.",
+    mobility:
+      "אינדיקטור טוב אינו רק מדד תוצאתי, אלא כלי כיוונון של המערכת. כאשר יודעים היכן הבוגרים נמצאים לאחר כמה שנים ובאיזה מסלול הם המשיכו, אפשר לחזק ליווי, רצף וחשיפה לתחומים מקדמי מוביליות.",
+    above: ["דוחות זכאות", "אחוזי שיבוץ"],
+    below: ["השאלה מהי הצלחה", "מהו מסלול חיים מיטיב"],
+    levels: {
+      "פרמטרים": [
+        "אילו נתונים פשוטים על מסלול הבוגר כדאי להתחיל לאסוף?",
+        "אילו צעדים הפיקוח יכול לקדם?",
+      ],
+      "לולאות משוב": [
+        "כיצד נתוני בוגרים יכולים לחזור למערכת ולהזין החלטות?",
+        "איזה תהליך יכול הפיקוח לעודד?",
+      ],
+      "מבנה ועיצוב": [
+        "מי צריך לראות את הנתונים ובאיזו תדירות, כדי שהמידע יהפוך לפעולה?",
+        "איזו יוזמה מקומית יכולה לצמוח מכאן?",
+      ],
+      "תכלית וכוונה": [
+        "עד כמה נגדיר יחד הצלחה דרך מסלול חיים, לצד הזכאות?",
+        "מה תפקיד הפיקוח בגיבוש הגדרה זו?",
+      ],
+    },
+    card:
+      "אם הקבוצה אומרת “צריך למדוד יותר”, קחו זאת צעד קדימה: “מה היה משתנה בהחלטות כבר היום אם היינו יודעים היכן הבוגרים שלנו נמצאים כעבור כמה שנים ובאיזה מסלול?”",
+  },
+];
+
+const LEVEL_META = {
+  "פרמטרים": {
+    color: "#A8895A",
+    icon: "▰",
+    note:
+      "הרמה הנוחה ביותר לקבוצות, ולכן גם זו שבה הן נוטות להיתקע. אפשרו את הרעיונות אך אל תסתפקו בהם. שאלו: מה יקרה אם נוסיף משאב, ולמה זה לא מספיק לבדו?",
+  },
+  "לולאות משוב": {
+    color: "#3A6B68",
+    icon: "↻",
+    note:
+      "כאן שואלים מה מחזק מה, ומה גורם להצלחה ראשונית להפוך להצלחה נוספת. רמה טובה לחשיבה על זיהוי מוקדם, חיזוק כוחות קיימים ולמידה מהתנסות. כשהקבוצה מתקשה: מה יתפוס מוקדם כדי למנוע התדרדרות או לחזק תהליך חיובי?",
+  },
+  "מבנה ועיצוב": {
+    color: "#5E7A92",
+    icon: "▢",
+    note:
+      "כאן עוסקים בנהלים, זרימות מידע, חלוקת אחריות וסוגי התארגנות. הרמה מחייבת לצאת מהמשאב אל האופן שבו המערכת בנויה. מה במבנה עצמו מאפשר או מונע פעולה מיטיבה?",
+  },
+  "תכלית וכוונה": {
+    color: "#7E7196",
+    icon: "◆",
+    note:
+      "הרמה העמוקה ביותר. כאן שואלים על מושגי ההצלחה, על הערכים המנחים את המערכת ועל התכלית הרחבה. עזרו לקבוצה לזהות אם יש מטרה משותפת או רק אוסף יעדים נפרדים.",
+  },
+};
+
+const SCHEDULE = [
+  { stage: "פתיחה והצגת התימה והמשימה", min: 8, cum: 8 },
+  { stage: "שלב א: העמקה בתימה מזווית הפיקוח", min: 12, cum: 20 },
+  { stage: "שלב ב: מילוי הקנווס, רמה אחר רמה", min: 50, cum: 70 },
+  { stage: "שלב ג: הצגה הדדית בין שתי הקבוצות ומשוב", min: 15, cum: 85 },
+  { stage: "איסוף תוצרים וסיכום", min: 5, cum: 90 },
+];
+
+const STAGE_B = [
+  { level: "פרמטרים", min: 10 },
+  { level: "לולאות משוב", min: 10 },
+  { level: "מבנה ועיצוב", min: 12 },
+  { level: "תכלית וכוונה", min: 12 },
+  { level: "סימון הרעיונות החזקים", min: 6 },
+];
+
+const CASES = [
+  {
+    n: 1,
+    title: "השיח נשאר בפרמטרים",
+    sit:
+      "הקבוצה מתמקדת בקלות בעוד שעות, תקנים או תקציב, ומתקשה להתקדם לרמות עמוקות יותר.",
+    resp:
+      "“אני רואה שיש הרבה רעיונות טובים ברמת המשאבים, וזה טבעי. בואו ניקח אחד מהם, למשל עוד שעות תגבור. מה היה צריך לקרות ברמת הכללים או המטרות כדי שהשעות האלה באמת ישנו משהו ולא רק יוסיפו עומס?”",
+  },
+  {
+    n: 2,
+    title: "מפקח אחד דומיננטי בשיח",
+    sit: "מפקח דומיננטי מדבר רוב הזמן והאחרים שותקים.",
+    resp:
+      "פנייה ישירה ועניינית לאחרים: “אני סקרן לשמוע איך הצומת הזה נראה דרך העיניים שלכם. מה אתם רואים שאחרים אולי לא?”",
+  },
+  {
+    n: 3,
+    title: "זה לא בידיים שלנו",
+    sit: "הקבוצה טוענת שהכול תלוי בתקציב, במשרד, או בגורמים שמעליהם.",
+    resp:
+      "“אני שומע את התסכול, וחלק מהדברים באמת מעבר לנו. בואו נמקד את נקודת המבט למה שאנחנו יכולים להעלות בשיחה הקרובה עם מנהל כפר או בית ספר. אפילו שאלה אחת שאפשר להוסיף לביקור הפיקוח היא פעולה.”",
+  },
+  {
+    n: 4,
+    title: "תשובה קלה ושטחית",
+    sit: "נאמרת קלישאה כמו “צריך להאמין בילדים” או “צריך יותר תיאום”.",
+    resp:
+      "להשתמש בשאלה המעמיקה מכרטיס התימה. לדוגמה: “מה ההבדל בין תיאום, העברת מידע, לבין אחריות משותפת אמיתית על מסלול החיים של התלמיד? איך כל אחד מהם נראה בפועל?”",
+  },
+  {
+    n: 5,
+    title: "ויכוח אם רעיון מספיק ריאלי",
+    sit: "שני משתתפים מתווכחים אם רעיון מסוים אפשרי בכלל.",
+    resp:
+      "“זה דיון חשוב, ובדיוק אליו נגיע במפגש הרביעי. כרגע אנחנו זורעים, אז נשאיר את הרעיון על הקנווס בלי להכריע ונוסיף לידו גם את הגרסה הריאלית יותר. שניהם נשארים.”",
+  },
+  {
+    n: 6,
+    title: "ממהרים לסיים רמה",
+    sit: "הקבוצה אומרת: “סיימנו, אפשר להתקדם.”",
+    resp:
+      "“מעולה. לפני שנתקדם, תנו לי עוד רעיון אחד ברמה הזו שאף אחד עדיין לא חשב עליו. לפעמים הרעיון הרביעי הוא הכי מעניין.”",
+  },
+  {
+    n: 7,
+    title: "בלבול בין רמות",
+    sit: "לא ברור אם רעיון מסוים שייך לפרמטרים או למבנה.",
+    resp:
+      "“שאלה טובה, ואין כאן נכון או לא נכון. בגדול, אם זה כמה, זה פרמטר. אם זה מי מחליט או איזה נוהל, זה מבנה. ואם מתלבטים, פשוט רושמים במקום שמרגיש נכון, העיקר שהרעיון נרשם.”",
+  },
+];
+
+const OPENING_SCRIPT = [
+  "שלום לכולם. בפתיחת היום ראינו ארבע רמות שמתארות היכן ניתן להתערב במערכת כדי לקדם מוביליות חברתית.",
+  "בחדר הזה נעבוד על תימה אחת. כל קבוצה תעבד עליה דרך ארבע הרמות, ובכל רמה נשאל שלוש שאלות: מה אני כמפקח יכול לעשות, מה האגף שלי יכול להוביל, ומה דורש חיבור בין אגפים.",
+  "חשוב לי להדגיש נקודה אחת: זה שלב של זריעת רעיונות. אנחנו לא בוחרים ולא מכריעים היום, אלא מרחיבים. כל רעיון נשאר על הקנווס, גם אם הוא נשמע לא מעשי. הבחירה תהיה במפגש הרביעי.",
+  "מבחינת תיעוד, ברמה האישית והאגפית כל אחד ממלא את הקנווס של האגף שלו, כדי שכל קול יישמע. ברמה הבינאגפית נמלא יחד קנווס אחד משותף. מתחילים.",
+];
+
+const STAGE_A_QUESTIONS = [
+  "כשאתם שומעים את התימה הזו, מה אתם רואים בפועל בשטח? תנו דוגמה אמיתית מהשנה האחרונה.",
+  "ומה לדעתכם מתחת לזה? מה מסביר שזה קורה שוב ושוב?",
+  "ומה המשמעות של זה עבורנו, כפיקוח שעובד מול המנהלים?",
+];
+
+// ===================== STYLES =====================
+
+const C = {
+  bg: "#EEF2F1",
+  panel: "#FAFCFB",
+  ink: "#26312F",
+  sub: "#5E6E6B",
+  line: "#D8E2DF",
+  accent: "#3A6B68",
+  accentSoft: "#5A8F8B",
+  gold: "#A8895A",
+};
+
+// ===================== COMPONENTS =====================
+
+function Pill({ children, color }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        background: color + "1A",
+        color: color,
+        border: `1px solid ${color}44`,
+        borderRadius: 999,
+        padding: "3px 12px",
+        fontSize: 13,
+        fontWeight: 600,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function SectionLabel({ children }) {
+  return (
+    <div
+      style={{
+        fontSize: 12,
+        fontWeight: 700,
+        letterSpacing: 2,
+        color: C.accent,
+        textTransform: "none",
+        marginBottom: 10,
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      <span
+        style={{
+          width: 22,
+          height: 2,
+          background: C.accent,
+          display: "inline-block",
+        }}
+      />
+      {children}
+    </div>
+  );
+}
+
+// ---------- TAB: OVERVIEW ----------
+function Overview() {
+  return (
+    <div>
+      <div style={{ marginBottom: 28 }}>
+        <SectionLabel>מסגרת הסדנה</SectionLabel>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+            gap: 14,
+          }}
+        >
+          {[
+            ["משך כולל", "90 דקות"],
+            ["הרכב החדר", "2 קבוצות, כ-6 משתתפים"],
+            ["הרכב קבוצה", "בינאגפי מעורב, כל האגפים"],
+            ["כלי עבודה", "קנווס נקודות מינוף אישי"],
+          ].map(([k, v]) => (
+            <div
+              key={k}
+              style={{
+                background: C.panel,
+                border: `1px solid ${C.line}`,
+                borderRadius: 14,
+                padding: "16px 18px",
+              }}
+            >
+              <div style={{ fontSize: 12.5, color: C.sub, marginBottom: 6 }}>
+                {k}
+              </div>
+              <div style={{ fontSize: 17, fontWeight: 700, color: C.ink }}>
+                {v}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 28 }}>
+        <SectionLabel>עקרונות יסוד</SectionLabel>
+        <div style={{ display: "grid", gap: 10 }}>
+          {[
+            "המטרה היא זריעה של רעיונות, לא בחירה או הכרעה.",
+            "כל אגף ממלא קנווס נפרד ברמה האישית והאגפית, כך שנוצרים ארבעה קנבסים אגפיים.",
+            "הקבוצה כולה ממלאת קנווס בינאגפי אחד, פעם אחת בלבד, בשיח משותף.",
+            "תפקיד המנחה הוא לשמור על קצב, עומק, ולוודא רישום מלא של כל הרעיונות.",
+          ].map((t, i) => (
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                gap: 14,
+                alignItems: "flex-start",
+                background: C.panel,
+                border: `1px solid ${C.line}`,
+                borderRadius: 12,
+                padding: "14px 16px",
+              }}
+            >
+              <span
+                style={{
+                  flexShrink: 0,
+                  width: 26,
+                  height: 26,
+                  borderRadius: 8,
+                  background: C.accent,
+                  color: "#fff",
+                  display: "grid",
+                  placeItems: "center",
+                  fontWeight: 700,
+                  fontSize: 14,
+                }}
+              >
+                {i + 1}
+              </span>
+              <span style={{ fontSize: 15.5, color: C.ink, lineHeight: 1.6 }}>
+                {t}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div
+        style={{
+          background: `linear-gradient(135deg, ${C.accent}, ${C.accentSoft})`,
+          borderRadius: 16,
+          padding: "22px 24px",
+          color: "#fff",
+        }}
+      >
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: 2,
+            opacity: 0.85,
+            marginBottom: 12,
+          }}
+        >
+          מבנה התוצר
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 18 }}>
+          <div style={{ flex: "1 1 240px" }}>
+            <div style={{ fontSize: 30, fontWeight: 800 }}>4 קנבסים אגפיים</div>
+            <div style={{ fontSize: 14.5, opacity: 0.92, lineHeight: 1.6, marginTop: 4 }}>
+              ברמה האישית והאגפית, כל אגף ממלא את הקנווס שלו, כדי שכל קול יישמע בנפרד.
+            </div>
+          </div>
+          <div
+            style={{
+              width: 1,
+              background: "rgba(255,255,255,0.3)",
+              alignSelf: "stretch",
+            }}
+          />
+          <div style={{ flex: "1 1 240px" }}>
+            <div style={{ fontSize: 30, fontWeight: 800 }}>1 קנווס בינאגפי</div>
+            <div style={{ fontSize: 14.5, opacity: 0.92, lineHeight: 1.6, marginTop: 4 }}>
+              הקבוצה כולה ממלאת קנווס משותף אחד, פעם אחת, בשיח בינאגפי.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- TAB: TIMER / SCHEDULE ----------
+function fmt(sec) {
+  const s = Math.max(0, Math.floor(sec));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${m}:${r.toString().padStart(2, "0")}`;
+}
+
+function Timer() {
+  const segments = STAGE_B; // level timer
+  const [idx, setIdx] = useState(0);
+  const [remaining, setRemaining] = useState(segments[0].min * 60);
+  const [running, setRunning] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (running) {
+      ref.current = setInterval(() => {
+        setRemaining((r) => {
+          if (r <= 1) {
+            return 0;
+          }
+          return r - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(ref.current);
+  }, [running]);
+
+  const seg = segments[idx];
+  const meta = LEVEL_META[seg.level] || { color: C.gold };
+  const total = seg.min * 60;
+  const pct = total > 0 ? (remaining / total) * 100 : 0;
+  const isLevelTimer = true;
+
+  function next() {
+    if (idx < segments.length - 1) {
+      const ni = idx + 1;
+      setIdx(ni);
+      setRemaining(segments[ni].min * 60);
+      setRunning(false);
+    }
+  }
+  function prev() {
+    if (idx > 0) {
+      const ni = idx - 1;
+      setIdx(ni);
+      setRemaining(segments[ni].min * 60);
+      setRunning(false);
+    }
+  }
+  function reset() {
+    setRemaining(seg.min * 60);
+    setRunning(false);
+  }
+
+  return (
+    <div>
+      <SectionLabel>טיימר שלב ב — מעבר בין רמות</SectionLabel>
+
+      <div
+        style={{
+          background: C.panel,
+          border: `1px solid ${C.line}`,
+          borderRadius: 20,
+          padding: "28px 24px",
+          textAlign: "center",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            insetInlineStart: 0,
+            top: 0,
+            bottom: 0,
+            width: `${100 - pct}%`,
+            background: meta.color + "14",
+            transition: "width 1s linear",
+          }}
+        />
+        <div style={{ position: "relative" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 15,
+              fontWeight: 700,
+              color: meta.color,
+              marginBottom: 4,
+            }}
+          >
+            <span style={{ fontSize: 18 }}>{meta.icon}</span>
+            רמה {idx + 1} מתוך {segments.length}: {seg.level}
+          </div>
+          <div
+            style={{
+              fontSize: 84,
+              fontWeight: 800,
+              lineHeight: 1,
+              color: remaining === 0 ? C.accent : C.ink,
+              fontVariantNumeric: "tabular-nums",
+              letterSpacing: -2,
+              margin: "10px 0",
+            }}
+          >
+            {fmt(remaining)}
+          </div>
+          {remaining === 0 && (
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: C.accent,
+                marginBottom: 10,
+              }}
+            >
+              עוברים לרמה הבאה
+            </div>
+          )}
+          <div style={{ fontSize: 13.5, color: C.sub, marginBottom: 18 }}>
+            הקצאה: {seg.min} דקות
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 10,
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              onClick={() => setRunning((r) => !r)}
+              style={{
+                background: running ? "#fff" : meta.color,
+                color: running ? meta.color : "#fff",
+                border: `2px solid ${meta.color}`,
+                borderRadius: 12,
+                padding: "12px 28px",
+                fontSize: 16,
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              {running ? "השהה" : "התחל"}
+            </button>
+            <button onClick={reset} style={ghostBtn}>
+              אפס
+            </button>
+            <button onClick={prev} disabled={idx === 0} style={ghostBtn}>
+              רמה קודמת
+            </button>
+            <button
+              onClick={next}
+              disabled={idx === segments.length - 1}
+              style={ghostBtn}
+            >
+              רמה הבאה
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {segments.map((s, i) => (
+          <button
+            key={i}
+            onClick={() => {
+              setIdx(i);
+              setRemaining(s.min * 60);
+              setRunning(false);
+            }}
+            style={{
+              flex: "1 1 auto",
+              background: i === idx ? (LEVEL_META[s.level]?.color || C.gold) : C.panel,
+              color: i === idx ? "#fff" : C.sub,
+              border: `1px solid ${i === idx ? "transparent" : C.line}`,
+              borderRadius: 10,
+              padding: "8px 6px",
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              minWidth: 80,
+            }}
+          >
+            {s.level}
+            <div style={{ fontSize: 11, opacity: 0.8 }}>{s.min}׳</div>
+          </button>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 30 }}>
+        <SectionLabel>לוח הזמנים המלא</SectionLabel>
+        <div
+          style={{
+            background: C.panel,
+            border: `1px solid ${C.line}`,
+            borderRadius: 14,
+            overflow: "hidden",
+          }}
+        >
+          {SCHEDULE.map((s, i) => (
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                padding: "13px 18px",
+                borderBottom:
+                  i < SCHEDULE.length - 1 ? `1px solid ${C.line}` : "none",
+              }}
+            >
+              <div
+                style={{
+                  flexShrink: 0,
+                  width: 52,
+                  fontSize: 18,
+                  fontWeight: 800,
+                  color: C.accent,
+                }}
+              >
+                {s.min}׳
+              </div>
+              <div style={{ flex: 1, fontSize: 15, color: C.ink }}>{s.stage}</div>
+              <div style={{ fontSize: 13, color: C.sub }}>{s.cum}׳ מצטבר</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: 16,
+          background: "#fff",
+          border: `1px dashed ${C.accentSoft}`,
+          borderRadius: 12,
+          padding: "14px 18px",
+          fontSize: 14,
+          color: C.sub,
+          lineHeight: 1.65,
+        }}
+      >
+        <strong style={{ color: C.accent }}>מנגנון המעבר:</strong> בכל פרק זמן
+        עוסקים ברמה אחת בלבד. כשנגמר הזמן, הכריזו בקול “עוברים לרמה הבאה”.
+        אם הקבוצה לא סיימה, ממשיכים בכל זאת. עדיף לגעת בכל ארבע הרמות מאשר למצות אחת.
+      </div>
+    </div>
+  );
+}
+
+const ghostBtn = {
+  background: "#fff",
+  color: C.sub,
+  border: `1px solid ${C.line}`,
+  borderRadius: 12,
+  padding: "12px 18px",
+  fontSize: 15,
+  fontWeight: 600,
+  cursor: "pointer",
+  fontFamily: "inherit",
+};
+
+// ---------- TAB: STAGES ----------
+function Stages() {
+  const blocks = [
+    {
+      tag: "פתיחה",
+      time: "8 דקות",
+      title: "הצגת התימה והמשימה",
+      role: [
+        "להציג קצר, תכליתי, בלי הרצאה.",
+        "להבהיר שני דגשים: זריעה ולא בחירה, ותיעוד נפרד לכל אגף לצד תיעוד משותף לבינאגפי.",
+        "להשיב בקצרה אם עולה שאלה תיאורטית.",
+      ],
+      script: OPENING_SCRIPT,
+    },
+    {
+      tag: "שלב א",
+      time: "12 דקות",
+      title: "העמקה בתימה מזווית הפיקוח",
+      lead:
+        "לפני שמתחילים למלא את הקנווס, פותחים דיון קצר שמטרתו להבין את התימה לעומק. שלוש שאלות יסוד:",
+      qs: STAGE_A_QUESTIONS,
+      role: [
+        "למנוע קפיצה מהירה מדי לפתרונות.",
+        "להחזיק את ההבחנה בין הגלוי לעין לבין מה שמתחתיו.",
+        "לכוון את השיח לפיקוח, לא רק לתיאור כללי.",
+        "אם עולה פתרון מוקדם: “רעיון מצוין, נרשום אותו לשלב הבא. כרגע אנחנו עדיין מבינים את התופעה.”",
+      ],
+    },
+    {
+      tag: "שלב ב",
+      time: "50 דקות",
+      title: "מילוי הקנווס, רמה אחר רמה",
+      lead: "בכל רמה: כל אגף ממלא את הקנווס שלו, מתקיים שיח בינאגפי, וממלאים את הקנווס המשותף.",
+      role: [
+        "לשמור על הקצב, באמצעות טיימר והכרזות מעבר.",
+        "לשמור על העומק, באמצעות השאלה החוזרת: “ומה היה צריך לקרות מתחת לזה כדי שזה יחזיק?”",
+        "לשלב בין הרמה האישית, האגפית והבינאגפית.",
+      ],
+    },
+    {
+      tag: "שלב ג",
+      time: "15 דקות",
+      title: "הצגה הדדית בין שתי הקבוצות",
+      lead:
+        "מכיוון שבחדר שתי קבוצות שעבדו על אותה תימה, ההצגה הדדית. כל קבוצה מציגה שלושה דברים בלבד:",
+      qs: [
+        "את התימה במשפט.",
+        "מה שעלה בדיון, מעל פני השטח ומתחת לפני השטח.",
+        "את הרעיון האחד שהכי עורר עניין, באיזו רמה הוא ולמה הוא חזק.",
+      ],
+      role: [
+        "לנהל את ההצגה בקצב מהיר.",
+        "לבקש להתמקד בזרע החזק ולא בקריאת כל הקנווס.",
+        "לדאוג שאין ביקורת על רעיונות, זה לא השלב.",
+      ],
+    },
+    {
+      tag: "סיום",
+      time: "5 דקות",
+      title: "איסוף תוצרים וסיכום",
+      role: [
+        "לוודא שכל חמשת הקנבסים מסומנים בשם הקבוצה והתימה.",
+        "מומלץ לצלם את הקנבסים לפני האיסוף, כגיבוי.",
+        "לחבר למפגש הבא: “כל מה שזרענו כאן היום הוא חומר הגלם שממנו נבנה במפגש הרביעי את תכניות העבודה לתשפ“ז.”",
+      ],
+    },
+  ];
+
+  return (
+    <div style={{ display: "grid", gap: 18 }}>
+      {blocks.map((b, i) => (
+        <div
+          key={i}
+          style={{
+            background: C.panel,
+            border: `1px solid ${C.line}`,
+            borderRadius: 16,
+            padding: "20px 22px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 14,
+              flexWrap: "wrap",
+            }}
+          >
+            <Pill color={C.accent}>{b.tag}</Pill>
+            <span style={{ fontSize: 13, color: C.sub, fontWeight: 600 }}>
+              {b.time}
+            </span>
+            <span
+              style={{
+                fontSize: 19,
+                fontWeight: 800,
+                color: C.ink,
+                marginInlineStart: 4,
+              }}
+            >
+              {b.title}
+            </span>
+          </div>
+
+          {b.lead && (
+            <p style={{ fontSize: 15, color: C.ink, lineHeight: 1.7, margin: "0 0 12px" }}>
+              {b.lead}
+            </p>
+          )}
+
+          {b.qs && (
+            <div style={{ display: "grid", gap: 8, marginBottom: 14 }}>
+              {b.qs.map((q, j) => (
+                <div
+                  key={j}
+                  style={{
+                    background: "#fff",
+                    border: `1px solid ${C.line}`,
+                    borderRadius: 10,
+                    padding: "11px 14px",
+                    fontSize: 15,
+                    color: C.ink,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {q}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {b.script && (
+            <div
+              style={{
+                background: "#FFFDF8",
+                border: `1px solid ${C.gold}55`,
+                borderInlineStart: `4px solid ${C.gold}`,
+                borderRadius: 10,
+                padding: "14px 16px",
+                marginBottom: 14,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: C.gold,
+                  marginBottom: 8,
+                  letterSpacing: 1,
+                }}
+              >
+                תסריט פתיחה
+              </div>
+              {b.script.map((line, j) => (
+                <p
+                  key={j}
+                  style={{
+                    fontSize: 14.5,
+                    color: C.ink,
+                    lineHeight: 1.75,
+                    margin: "0 0 8px",
+                  }}
+                >
+                  {line}
+                </p>
+              ))}
+            </div>
+          )}
+
+          <div>
+            <div
+              style={{
+                fontSize: 12.5,
+                fontWeight: 700,
+                color: C.accent,
+                marginBottom: 8,
+              }}
+            >
+              תפקיד המנחה
+            </div>
+            <ul style={{ margin: 0, paddingInlineStart: 18, display: "grid", gap: 6 }}>
+              {b.role.map((r, j) => (
+                <li
+                  key={j}
+                  style={{ fontSize: 14.5, color: C.sub, lineHeight: 1.6 }}
+                >
+                  {r}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------- TAB: THEME DETAIL ----------
+function ThemeView({ theme }) {
+  return (
+    <div>
+      <div
+        style={{
+          background: `linear-gradient(135deg, ${C.ink}, #1C2624)`,
+          borderRadius: 18,
+          padding: "26px 26px",
+          color: "#fff",
+          marginBottom: 22,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: 2,
+            color: C.gold,
+            marginBottom: 8,
+          }}
+        >
+          תימה {theme.id}
+        </div>
+        <h2 style={{ margin: 0, fontSize: 30, fontWeight: 800, lineHeight: 1.2 }}>
+          {theme.title}
+        </h2>
+        <p
+          style={{
+            fontSize: 15.5,
+            lineHeight: 1.8,
+            opacity: 0.92,
+            marginTop: 14,
+            marginBottom: 0,
+          }}
+        >
+          {theme.intro}
+        </p>
+      </div>
+
+      <div
+        style={{
+          background: "#fff",
+          border: `1px solid ${C.line}`,
+          borderInlineStart: `4px solid ${C.gold}`,
+          borderRadius: 12,
+          padding: "18px 20px",
+          marginBottom: 22,
+        }}
+      >
+        <SectionLabel>החיבור למוביליות</SectionLabel>
+        <p style={{ margin: 0, fontSize: 15, color: C.ink, lineHeight: 1.75 }}>
+          {theme.mobility}
+        </p>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          gap: 14,
+          marginBottom: 24,
+        }}
+      >
+        <div
+          style={{
+            background: C.panel,
+            border: `1px solid ${C.line}`,
+            borderRadius: 14,
+            padding: "16px 18px",
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.accentSoft, marginBottom: 10 }}>
+            מעל פני השטח
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {theme.above.map((t, i) => (
+              <Pill key={i} color={C.accentSoft}>
+                {t}
+              </Pill>
+            ))}
+          </div>
+        </div>
+        <div
+          style={{
+            background: C.panel,
+            border: `1px solid ${C.line}`,
+            borderRadius: 14,
+            padding: "16px 18px",
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#5E7A92", marginBottom: 10 }}>
+            מתחת לפני השטח
+          </div>
+          <ul style={{ margin: 0, paddingInlineStart: 18, display: "grid", gap: 6 }}>
+            {theme.below.map((t, i) => (
+              <li key={i} style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.55 }}>
+                {t}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <SectionLabel>שאלות הרחבה לפי רמות</SectionLabel>
+      <div style={{ display: "grid", gap: 12, marginBottom: 22 }}>
+        {Object.entries(theme.levels).map(([level, qs]) => {
+          const meta = LEVEL_META[level];
+          return (
+            <div
+              key={level}
+              style={{
+                background: C.panel,
+                border: `1px solid ${C.line}`,
+                borderRadius: 14,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  background: meta.color + "14",
+                  borderBottom: `1px solid ${meta.color}33`,
+                  padding: "10px 16px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                <span style={{ fontSize: 16, color: meta.color }}>{meta.icon}</span>
+                <span style={{ fontSize: 16, fontWeight: 700, color: meta.color }}>
+                  {level}
+                </span>
+              </div>
+              <ul style={{ margin: 0, padding: "14px 16px", paddingInlineStart: 32, display: "grid", gap: 8 }}>
+                {qs.map((q, i) => (
+                  <li key={i} style={{ fontSize: 15, color: C.ink, lineHeight: 1.6 }}>
+                    {q}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+
+      <div
+        style={{
+          background: "#FFFDF8",
+          border: `1px solid ${C.gold}55`,
+          borderRadius: 14,
+          padding: "18px 20px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontSize: 13,
+            fontWeight: 700,
+            color: C.gold,
+            marginBottom: 8,
+            letterSpacing: 1,
+          }}
+        >
+          <span style={{ fontSize: 16 }}>✦</span> כרטיס מנחה, איך מעמיקים בשיח
+        </div>
+        <p style={{ margin: 0, fontSize: 15, color: C.ink, lineHeight: 1.75 }}>
+          {theme.card}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function Themes() {
+  const [sel, setSel] = useState(THEMES[0].id);
+  const theme = THEMES.find((t) => t.id === sel);
+  return (
+    <div>
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          flexWrap: "wrap",
+          marginBottom: 22,
+        }}
+      >
+        {THEMES.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setSel(t.id)}
+            style={{
+              flex: "1 1 auto",
+              minWidth: 130,
+              background: sel === t.id ? C.accent : C.panel,
+              color: sel === t.id ? "#fff" : C.sub,
+              border: `1px solid ${sel === t.id ? "transparent" : C.line}`,
+              borderRadius: 12,
+              padding: "12px 10px",
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              lineHeight: 1.3,
+            }}
+          >
+            <div style={{ fontSize: 11, opacity: 0.7, marginBottom: 2 }}>
+              תימה {t.id}
+            </div>
+            {t.short}
+          </button>
+        ))}
+      </div>
+      <ThemeView theme={theme} />
+    </div>
+  );
+}
+
+// ---------- TAB: CASES ----------
+function Cases() {
+  return (
+    <div>
+      <SectionLabel>מקרים ותגובות בזמן אמת</SectionLabel>
+      <p style={{ fontSize: 14.5, color: C.sub, lineHeight: 1.65, marginTop: 0, marginBottom: 20 }}>
+        מצבים שכמעט בוודאי יקרו בחדר, עם תגובה מוצעת לכל אחד. אלה כלים לשמירה על
+        עומק ועל אווירת זריעה.
+      </p>
+      <div style={{ display: "grid", gap: 14 }}>
+        {CASES.map((c) => (
+          <div
+            key={c.n}
+            style={{
+              background: C.panel,
+              border: `1px solid ${C.line}`,
+              borderRadius: 14,
+              padding: "18px 20px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                marginBottom: 10,
+              }}
+            >
+              <span
+                style={{
+                  flexShrink: 0,
+                  width: 30,
+                  height: 30,
+                  borderRadius: 9,
+                  background: C.accent,
+                  color: "#fff",
+                  display: "grid",
+                  placeItems: "center",
+                  fontWeight: 800,
+                  fontSize: 15,
+                }}
+              >
+                {c.n}
+              </span>
+              <span style={{ fontSize: 17, fontWeight: 800, color: C.ink }}>
+                {c.title}
+              </span>
+            </div>
+            <p style={{ fontSize: 14.5, color: C.sub, lineHeight: 1.65, margin: "0 0 12px" }}>
+              {c.sit}
+            </p>
+            <div
+              style={{
+                background: "#fff",
+                borderInlineStart: `4px solid ${C.accentSoft}`,
+                border: `1px solid ${C.line}`,
+                borderRadius: 10,
+                padding: "13px 16px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: C.accentSoft,
+                  marginBottom: 6,
+                }}
+              >
+                תגובה מוצעת
+              </div>
+              <p style={{ margin: 0, fontSize: 15, color: C.ink, lineHeight: 1.7 }}>
+                {c.resp}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------- TAB: LEVELS APPENDIX ----------
+function Levels() {
+  return (
+    <div>
+      <SectionLabel>נספח: דגשים מקצועיים לפי רמות</SectionLabel>
+      <p style={{ fontSize: 14.5, color: C.sub, lineHeight: 1.65, marginTop: 0, marginBottom: 20 }}>
+        רקע למנחה על ארבע רמות המינוף. אין צורך ללמד זאת, אלא להיעזר בו אם עולות
+        שאלות, וכדי לעזור לקבוצה לשייך רעיונות לרמה הנכונה.
+      </p>
+      <div style={{ display: "grid", gap: 14 }}>
+        {Object.entries(LEVEL_META).map(([level, meta], i) => (
+          <div
+            key={level}
+            style={{
+              background: C.panel,
+              border: `1px solid ${C.line}`,
+              borderInlineStart: `5px solid ${meta.color}`,
+              borderRadius: 14,
+              padding: "18px 20px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                marginBottom: 10,
+              }}
+            >
+              <span
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  background: meta.color + "1A",
+                  color: meta.color,
+                  display: "grid",
+                  placeItems: "center",
+                  fontSize: 20,
+                }}
+              >
+                {meta.icon}
+              </span>
+              <div>
+                <div style={{ fontSize: 11, color: C.sub }}>רמה {i + 1}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: meta.color }}>
+                  {level}
+                </div>
+              </div>
+            </div>
+            <p style={{ margin: 0, fontSize: 15, color: C.ink, lineHeight: 1.75 }}>
+              {meta.note}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div
+        style={{
+          marginTop: 20,
+          background: `linear-gradient(135deg, ${C.ink}, #1C2624)`,
+          borderRadius: 14,
+          padding: "20px 22px",
+          color: "#fff",
+        }}
+      >
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.gold, marginBottom: 8 }}>
+          עיקרון על
+        </div>
+        <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.8, opacity: 0.95 }}>
+          ככל שיורדים מהפרמטרים אל התכלית והכוונה, השינוי קשה יותר ולא תמיד נוח, אך
+          הוא מזיז יותר מערכת ולאורך זמן רב יותר. אין רמה אחת “נכונה”. המטרה
+          לראות שאנו נוטים להתרכז בפרמטרים, ולהתאמן לגעת גם בעמוק.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ===================== APP =====================
+
+const TABS = [
+  { id: "overview", label: "סקירה", icon: "◷" },
+  { id: "timer", label: "זמנים וטיימר", icon: "⏱" },
+  { id: "stages", label: "שלבי הסדנה", icon: "▤" },
+  { id: "themes", label: "התימות", icon: "◎" },
+  { id: "cases", label: "מקרים ותגובות", icon: "✦" },
+  { id: "levels", label: "נספח רמות", icon: "◆" },
+];
+
+function App() {
+  const [tab, setTab] = useState("overview");
+
+  return (
+    <div
+      dir="rtl"
+      style={{
+        fontFamily:
+          "'Heebo', 'Assistant', system-ui, sans-serif",
+        background: C.bg,
+        minHeight: "100vh",
+        color: C.ink,
+      }}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@700;900&display=swap');
+        * { box-sizing: border-box; }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 10px; }
+      `}</style>
+
+      {/* HEADER */}
+      <header
+        style={{
+          background: `linear-gradient(135deg, ${C.accent}, #4E807C)`,
+          color: "#fff",
+          padding: "26px 22px 20px",
+        }}
+      >
+        <div style={{ maxWidth: 860, margin: "0 auto" }}>
+          <div
+            style={{
+              fontSize: 12.5,
+              fontWeight: 700,
+              letterSpacing: 3,
+              opacity: 0.85,
+              marginBottom: 8,
+            }}
+          >
+            מדריך מנחה · יום למידה שלישי
+          </div>
+          <h1
+            style={{
+              margin: 0,
+              fontFamily: "'Frank Ruhl Libre', serif",
+              fontSize: 38,
+              fontWeight: 900,
+              lineHeight: 1.1,
+            }}
+          >
+            סדנה 2 · מהתימה אל הקנווס
+          </h1>
+          <p
+            style={{
+              margin: "10px 0 0",
+              fontSize: 15,
+              opacity: 0.9,
+              maxWidth: 620,
+              lineHeight: 1.6,
+            }}
+          >
+            נקודות מינוף לקידום מוביליות חברתית. מדריך הפעלה למנחה, כולל זמנים,
+            תסריט, תימות ומקרים מהשטח.
+          </p>
+        </div>
+      </header>
+
+      {/* TABS */}
+      <nav
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          background: C.bg + "F2",
+          backdropFilter: "blur(8px)",
+          borderBottom: `1px solid ${C.line}`,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 860,
+            margin: "0 auto",
+            display: "flex",
+            gap: 4,
+            padding: "8px 14px",
+            overflowX: "auto",
+          }}
+        >
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              style={{
+                flex: "0 0 auto",
+                display: "flex",
+                alignItems: "center",
+                gap: 7,
+                background: tab === t.id ? C.ink : "transparent",
+                color: tab === t.id ? "#fff" : C.sub,
+                border: "none",
+                borderRadius: 10,
+                padding: "10px 16px",
+                fontSize: 14.5,
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                whiteSpace: "nowrap",
+                transition: "all 0.15s",
+              }}
+            >
+              <span style={{ fontSize: 15, opacity: 0.85 }}>{t.icon}</span>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {/* CONTENT */}
+      <main
+        style={{
+          maxWidth: 860,
+          margin: "0 auto",
+          padding: "28px 18px 80px",
+        }}
+      >
+        {tab === "overview" && <Overview />}
+        {tab === "timer" && <Timer />}
+        {tab === "stages" && <Stages />}
+        {tab === "themes" && <Themes />}
+        {tab === "cases" && <Cases />}
+        {tab === "levels" && <Levels />}
+      </main>
+    </div>
+  );
+}
+
+
+const container = document.getElementById('root');
+const root = ReactDOM.createRoot(container);
+root.render(<App />);
+</script>
+</body>
+</html>
