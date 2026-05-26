@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מדריך מנחה · פעילות 1 · באיזו רמה זה עובד</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #EEF2F1; }
+  * { box-sizing: border-box; }
+  #root { min-height: 100vh; }
+  .app-loading {
+    min-height: 100vh; display: grid; place-items: center;
+    font-family: 'Heebo', system-ui, sans-serif; color: #3A6B68;
+    font-size: 18px; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div id="root"><div class="app-loading" dir="rtl">טוען את מדריך המנחה…</div></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+// ===================== DATA =====================
+
+const LEVEL_META = {
+  "פרמטרים": {
+    color: "#A8895A",
+    icon: "▰",
+    note:
+      "הרמה הנוחה ביותר לקבוצות, ולכן גם זו שבה הן נוטות להיתקע. אפשרו את הרעיונות אך אל תסתפקו בהם. שאלו: מה יקרה אם נוסיף משאב, ולמה זה לא מספיק לבדו?",
+  },
+  "לולאות משוב": {
+    color: "#3A6B68",
+    icon: "↻",
+    note:
+      "כאן שואלים מה מחזק מה, ומה גורם להצלחה ראשונית להפוך להצלחה נוספת. רמה טובה לחשיבה על זיהוי מוקדם, חיזוק כוחות קיימים ולמידה מהתנסות. כשהקבוצה מתקשה: מה יתפוס מוקדם כדי למנוע התדרדרות או לחזק תהליך חיובי?",
+  },
+  "מבנה ועיצוב": {
+    color: "#5E7A92",
+    icon: "▢",
+    note:
+      "כאן עוסקים בנהלים, זרימות מידע, חלוקת אחריות וסוגי התארגנות. הרמה מחייבת לצאת מהמשאב אל האופן שבו המערכת בנויה. מה במבנה עצמו מאפשר או מונע פעולה מיטיבה?",
+  },
+  "תכלית וכוונה": {
+    color: "#7E7196",
+    icon: "◆",
+    note:
+      "הרמה העמוקה ביותר. כאן שואלים על מושגי ההצלחה, על הערכים המנחים את המערכת ועל התכלית הרחבה. עזרו לקבוצה לזהות אם יש מטרה משותפת או רק אוסף יעדים נפרדים.",
+  },
+};
+
+const SCENARIOS = [
+  {
+    id: 1,
+    tag: "אגף פדגוגי",
+    short: "שעות תגבור",
+    title: "שעות תגבור באוריינות שפה",
+    levelTag: "פרמטרים",
+    story:
+      "האגף הפדגוגי זיהה שתלמידים מרקע מוחלש מגיעים עם פערים באוריינות שפה, שמשפיעים על ההצלחה שלהם כמעט בכל מקצוע. כתגובה החליט האגף להוסיף שתי שעות תגבור שבועיות בשפה לתלמידים אלה, עם מורה ייעודי. ההחלטה התקבלה במהירות, התקציב אושר, והתגבור החל לפעול כבר באמצע השנה.",
+    levelNow:
+      "בעיקר פרמטרים. הפעולה מוסיפה משאב כמותי: שעות, מורה, תקציב. זו הרמה הנוחה והמהירה ביותר.",
+    how:
+      "הפעולה מגדילה את כמות ההוראה שהתלמיד מקבל בשפה. ההנחה היא שיותר שעות יסגרו את הפער. זו פעולה ממוקדת, מיידית וקלה למדידה, אך השפעתה תלויה בכך שדברים אחרים יישארו במקומם.",
+    points: [
+      "מה יקרה אם נוסיף שעות אך התלמיד עדיין נתפס כחלש ואינו מאמין שהוא יכול להתקדם? השעות לבדן אינן נוגעות בתפיסת העצמי.",
+      "האם השעות מחוברות למטרה ברורה? תגבור לקראת מה, סגירת פער כללי או פתיחת דלת למסלול מתקדם?",
+      "מי רואה אם השעות עובדות, ומתי? ללא לולאת משוב אפשר להשקיע שנה שלמה בלי לדעת אם זה הועיל.",
+    ],
+    promote: [
+      ["מבנה ועיצוב", "לחבר את השעות לנוהל, למשל קריטריון שכל תלמיד שמראה התקדמות בשפה זכאי להיבחן למסלול מתקדם, כך שהשעות פותחות דלת ולא רק סוגרות פער."],
+      ["לולאות משוב", "להגדיר נקודות בדיקה לאורך השנה שבהן בוחנים אם התגבור מקדם, ומתאימים אותו בהתאם."],
+      ["תכלית וכוונה", "לחבר את התגבור לנרטיב של פוטנציאל, אנחנו פותחים בפניך מסלול, ולא רק אנחנו מתקנים חולשה."],
+    ],
+    questions: [
+      "אם השעות האלה יצליחו במלואן, מה ייפתח בפני התלמיד בעוד שלוש שנים?",
+      "מה היה צריך לקרות מסביב לשעות, כדי שהן ישנו מסלול ולא רק יוסיפו עומס?",
+      "מי מחליט מתי תלמיד מוכן לעבור הלאה, ולפי מה?",
+    ],
+  },
+  {
+    id: 2,
+    tag: "אגף פנימיות",
+    short: "מרחב מייקרספייס",
+    title: "מרחב מייקרספייס וחוגים טכנולוגיים",
+    levelTag: "התארגנות עצמית",
+    story:
+      "הפנימייה החליטה לפתח מרחב מייקרספייס, ולהציע בו חוגים טכנולוגיים אחר הצהריים ובחופשות. הרעיון נולד מתוך זיהוי שלתלמידים רבים יש סקרנות וכישרון טכנולוגי שאינם באים לידי ביטוי בשעות בית הספר. המרחב נפתח, צוידו בו כלים, וכמה מדריכים החלו להעביר בו פעילות.",
+    levelNow:
+      "נע בין פרמטרים, משאב חדש כמו מרחב, ציוד וחוגים, לבין התארגנות עצמית שבתוך מבנה ועיצוב. עצם זה שהפנימייה יזמה מרחב חדש מתוך זיהוי צורך הוא ביטוי של ארגון עצמי, שזו רמה עמוקה יחסית.",
+    how:
+      "הפעולה יוצרת הזדמנות חדשה לחשיפה ולפיתוח כישרון שאינו בא לידי ביטוי בשעות הלימוד. היא יכולה לבנות הון תרבותי, היכרות עם עולם הטכנולוגיה, והון חברתי, קשר עם מדריכים וקבוצת עניין.",
+    points: [
+      "זהו תרחיש חזק יחסית, כי הוא כבר נוגע בארגון עצמי. כדאי לציין זאת, כדי שהקבוצה תראה דוגמה לפעולה שאינה רק פרמטרים.",
+      "הסיכון: אם המרחב יישאר חוג נחמד אחר הצהריים, הוא ייתקע ברמת הפרמטרים. הוא הופך משפיע כשהוא מחובר למסלול.",
+      "האם מי שמגיע למרחב הם דווקא התלמידים שכבר חזקים, או גם מי שזקוק לכך יותר? ללא כוונה, מרחבים כאלה לעיתים מחזקים את החזקים.",
+    ],
+    promote: [
+      ["מבנה ועיצוב", "לחבר את המרחב למסלול, למשל גשר מהחוג הטכנולוגי אל מגמה טכנולוגית בבית הספר, או אל חשיפה לאקדמיה ולעולם העבודה."],
+      ["לולאות משוב", "ליצור לולאה חיובית שבה תלמידים מהמרחב מציגים את עבודתם, מובילים אחרים, ובוגרים חוזרים להדריך."],
+      ["תכלית וכוונה", "להגדיר שהמרחב אינו פעילות פנאי בלבד, אלא חלק מהמשימה של הפנימייה לפתוח מסלולי מוביליות."],
+    ],
+    questions: [
+      "מה צריך לקרות כדי שהמרחב הזה יהפוך מחוג נחמד למקפצה אמיתית למסלול?",
+      "מי הם התלמידים שמגיעים למרחב, ומי לא מגיע ואולי הכי היה נשכר?",
+      "איך נדע, בעוד שנתיים, אם המרחב קידם מוביליות ולא רק העביר את הזמן?",
+    ],
+  },
+  {
+    id: 3,
+    tag: "אגף קליטה והשמה",
+    short: "נוהל קליטה",
+    title: "נוהל קליטה לפי פוטנציאל וחוזקות",
+    levelTag: "מבנה ועיצוב",
+    story:
+      "אגף הקליטה החליט לשנות את נוהל הקליטה. במקום שהשיבוץ לכפר נוער ייקבע בעיקר לפי זמינות מקום והתאמה בסיסית, הנוהל החדש מחייב לבחון את הפוטנציאל והחוזקות של התלמיד, ולהתאים לו כפר נוער שבו יש מסלול שיכול לקדם אותו ולתמוך במוביליות חברתית. השינוי מעגן בכתב קריטריון חדש שכל שיבוץ צריך לעמוד בו.",
+    levelNow:
+      "בעיקר מבנה ועיצוב, ונוגע גם בתכלית וכוונה. זהו שינוי בכלל המשחק, בקריטריון שלפיו מתקבלת החלטה, ולא רק תוספת משאב. זו רמת מינוף עמוקה יחסית.",
+    how:
+      "הפעולה משנה את האופן שבו המערכת מחליטה. במקום ששיבוץ ייקבע לפי זמינות, הוא נקבע לפי פוטנציאל ומסלול. שינוי כלל אחד כזה משפיע על שורה שלמה של החלטות עתידיות, ולכן זו פעולה חזקה.",
+    points: [
+      "כדאי להדגיש שזו דוגמה מצוינת לפעולה ברמה עמוקה, ולבקש מהקבוצה לשים לב למה היא חזקה יותר מסתם תוספת משאב.",
+      "הנוהל החדש דורש מידע. מי מספק את נתוני הפוטנציאל והחוזקות, ובאיזו איכות? כאן הפעולה נשענת על זרימת מידע.",
+      "שינוי נוהל הוא חזק, אך הוא מחזיק רק אם הוא מלווה בתפיסה משותפת. אם הצוות אינו מאמין בנרטיב הפוטנציאל, הנוהל יהפוך לטופס.",
+    ],
+    promote: [
+      ["תכלית וכוונה", "לוודא שהנוהל מבטא מטרה מוצהרת ומשותפת, שכל ארבעת האגפים שותפים לה, ולא רק כלל פנימי של אגף הקליטה."],
+      ["מבנה ועיצוב", "לבנות מנגנון שמספק את נתוני הפוטנציאל באופן אמין, אולי בשיתוף האגף הפסיכו סוציאלי והפדגוגי, חיזוק זרימת המידע."],
+      ["לולאות משוב", "לעקוב אם השיבוץ החדש אכן הוביל למסלולים טובים יותר, ולהזין את התובנות חזרה לנוהל."],
+    ],
+    questions: [
+      "מה הופך את שינוי הנוהל הזה לחזק יותר מהוספת שעות או תקציב?",
+      "מי צריך להיות שותף לנוהל הזה כדי שהוא יחזיק לאורך זמן, ולא יישאר על הנייר?",
+      "מאיפה יגיע המידע על הפוטנציאל של התלמיד, ועד כמה נוכל לסמוך עליו?",
+    ],
+  },
+  {
+    id: 4,
+    tag: "אגף פסיכו סוציאלי",
+    short: "איזון טיפול ורף",
+    title: "איזון בין טיפול להצבת רף",
+    levelTag: "תכלית וכוונה",
+    story:
+      "האגף הפסיכו סוציאלי שילב בפרוטוקול העבודה שלו עיקרון חדש: לצד המענה הטיפולי והתמיכה הרגשית, הצוות מחויב גם להציב לתלמיד רף ציפיות גבוה, שיכול לקדם אותו בעתיד. הפרוטוקול מבקש לאזן בין להחזיק את התלמיד לבין להניע אותו קדימה, מתוך תפיסה שתמיכה רגשית ושאיפה לצמיחה אינן סותרות.",
+    levelNow:
+      "בעיקר תכלית וכוונה, ונוגע במבנה ועיצוב דרך הפרוטוקול. זהו שינוי בתפיסה עצמה, באמונה על מה תפקיד הצוות הפסיכו סוציאלי. זו רמת המינוף העמוקה ביותר.",
+    how:
+      "הפעולה משנה את הנרטיב, מהחזקה וייצוב אל החזקה וגם הנעה. זו בדיוק העדשה של פוטנציאל מול סיכון. כשהשינוי הזה מעוגן בפרוטוקול, הוא הופך מאמונה אישית לעיקרון מערכתי.",
+    points: [
+      "כדאי לציין שזו הדוגמה העמוקה ביותר מבין הארבע, כי היא נוגעת בפרדיגמה, בסיפור שהמערכת מספרת על תפקידה.",
+      "האתגר הפוך מהתרחישים הקודמים: כאן הפעולה עמוקה מאוד, אך קשה ליישום. כיצד מתרגמים עיקרון מופשט להתנהגות יומיומית של הצוות?",
+      "יש כאן מתח עדין שראוי לכבד: הצבת רף גבוה צריכה להיעשות מתוך תמיכה, אחרת היא עלולה להכביד. הדיון יכול לגעת באיך מאזנים נכון.",
+    ],
+    promote: [
+      ["מבנה ועיצוב", "לתרגם את העיקרון לכלים קונקרטיים בפרוטוקול, למשל שאלות מנחות, שגרות שיחה וסימני דרך, כדי שהוא לא יישאר הצהרה."],
+      ["לולאות משוב", "ליצור דרך לבחון אם האיזון אכן עובד, ואם תלמידים חווים גם תמיכה וגם הנעה."],
+      ["פרמטרים", "לוודא שיש מספיק זמן ומשאבי הדרכה לצוות, כדי שהעיקרון העמוק יקבל גם תמיכה מעשית. כאן דווקא התנועה היא לחבר את העמוק אל המוחשי, כדי שלא יישאר באוויר."],
+    ],
+    questions: [
+      "זו פעולה עמוקה מאוד. מה האתגר הכי גדול בלהפוך אמונה כזו להתנהגות יומיומית של הצוות?",
+      "איך נדע שהצבנו רף גבוה מתוך תמיכה, ולא הכבדנו על התלמיד?",
+      "מה צריך לקרות ברמת הפרמטרים והמבנה כדי שהעיקרון היפה הזה לא יישאר רק כותרת?",
+    ],
+  },
+];
+
+const SCHEDULE = [
+  { stage: "פתיחה: סבב קשר והצגת הפעילות", min: 15, cum: 15 },
+  { stage: "שלב א: ארבעה סבבי תרחישים", min: 40, cum: 55 },
+  { stage: "סיום: סבב סיכום קצר של המשתתפים", min: 5, cum: 60 },
+];
+
+const ROUNDS = [
+  { round: "תרחיש 1, אגף פדגוגי", min: 10 },
+  { round: "תרחיש 2, אגף פנימיות", min: 10 },
+  { round: "תרחיש 3, אגף קליטה והשמה", min: 10 },
+  { round: "תרחיש 4, אגף פסיכו סוציאלי", min: 10 },
+];
+
+const CASES = [
+  {
+    n: 1,
+    title: "הקבוצה קופצת ישר לשיפור",
+    sit:
+      "עוד לפני שאובחנה הרמה הנוכחית, המשתתפים כבר מציעים איך לשפר את הפעולה.",
+    resp:
+      "רגע לפני שנשפר, בואו נבין איפה הפעולה נמצאת עכשיו. באיזו רמה היא עובדת היום, ומה בדיוק היא משנה? אחרי שנבין את זה, נחשוב יחד איך לקדם אותה.",
+  },
+  {
+    n: 2,
+    title: "השיפור נשאר בלהוסיף עוד",
+    sit:
+      "כשנשאלים איך לקדם את הפעולה, התשובה היא עוד שעות, עוד תקציב או עוד אנשים.",
+    resp:
+      "תוספת משאב היא כיוון לגיטימי. עכשיו בואו ננסה כיוון אחר: מה היה הופך את הפעולה הזו לעמוקה יותר, ברמת הכללים, המידע או המטרה, ולא רק גדולה יותר?",
+  },
+  {
+    n: 3,
+    title: "הדיון הופך לביקורת על אגף",
+    sit:
+      "המשתתפים מתחילים לבקר את האגף שהחליט על הפעולה, כאילו היא שגויה.",
+    resp:
+      "חשוב לי להדגיש שאין כאן פעולה גרועה. כל הפעולות בתרחישים הן טובות ואמיתיות. השאלה שלנו אינה אם הפעולה נכונה, אלא באיזו רמת עומק היא נוגעת, ואיך אפשר להעמיק אותה.",
+  },
+  {
+    n: 4,
+    title: "התלבטות באיזו רמה הפעולה יושבת",
+    sit:
+      "הקבוצה מתווכחת אם תרחיש מסוים שייך לפרמטרים או למבנה.",
+    resp:
+      "אין כאן תשובה אחת נכונה, ולעיתים פעולה אחת נוגעת בכמה רמות בו זמנית. בגדול, אם זה כמה, זה פרמטר. אם זה מי מחליט או איזה נוהל, זה מבנה. רשמו את שתי האפשרויות, זה חלק מהלמידה.",
+  },
+  {
+    n: 5,
+    title: "משתתף אחד מוביל את כל הדיון",
+    sit:
+      "מפקח אחד, לרוב מהאגף הרלוונטי לתרחיש, מדבר רוב הזמן והאחרים שותקים.",
+    resp:
+      "פנייה ישירה ועניינית לאגפים האחרים: אני סקרן לשמוע איך הפעולה הזו נראית דרך העיניים שלכם, מאגף אחר. מה אתם רואים בה שאולי פחות בולט מבחוץ?",
+  },
+  {
+    n: 6,
+    title: "הקבוצה מתקשה לראות מה מתחת לפעולה",
+    sit:
+      "המשתתפים מתארים מה הפעולה עושה, אך מתקשים לזהות מה היא משנה לעומק.",
+    resp:
+      "שאלה שיכולה לעזור: אם הפעולה הזו תצליח במלואה, מה ישתנה אצל התלמיד בעוד שלוש שנים? לעיתים ההסתכלות קדימה חושפת את העומק האמיתי של הפעולה.",
+  },
+];
+
+const OPENING_SCRIPT = [
+  "שלום לכולם. בסדנה זו נעמיק בנקודות מינוף דרך ארבעה תרחישים.",
+  "בכל פעם נציג לכם תרחיש ונשאל שאלות לדיון. חשוב לנו לשמוע את כל נקודות המבט.",
+  "המטרה היא להעמיק בחיבור בין זיהוי נקודות מינוף לבין היומיום שלנו.",
+];
+
+const ROUND_QUESTIONS = [
+  "באיזו רמת מינוף הפעולה עובדת כרגע? פרמטרים, לולאות משוב, מבנה ועיצוב או תכלית וכוונה.",
+  "באיזה אופן היא פועלת? מה בדיוק היא משנה?",
+  "איך אפשר לקדם אותה לרמה משפיעה יותר?",
+];
+
+// ===================== STYLES =====================
+
+const C = {
+  bg: "#EEF2F1",
+  panel: "#FAFCFB",
+  ink: "#26312F",
+  sub: "#5E6E6B",
+  line: "#D8E2DF",
+  accent: "#3A6B68",
+  accentSoft: "#5A8F8B",
+  gold: "#A8895A",
+};
+
+// ===================== COMPONENTS =====================
+
+function Pill({ children, color }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        background: color + "1A",
+        color: color,
+        border: "1px solid " + color + "44",
+        borderRadius: 999,
+        padding: "3px 12px",
+        fontSize: 13,
+        fontWeight: 600,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function SectionLabel({ children }) {
+  return (
+    <div
+      style={{
+        fontSize: 12,
+        fontWeight: 700,
+        letterSpacing: 2,
+        color: C.accent,
+        marginBottom: 10,
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      <span style={{ width: 22, height: 2, background: C.accent, display: "inline-block" }} />
+      {children}
+    </div>
+  );
+}
+
+// ---------- TAB: OVERVIEW ----------
+function Overview() {
+  return (
+    <div>
+      <div style={{ marginBottom: 28 }}>
+        <SectionLabel>מסגרת הפעילות</SectionLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14 }}>
+          {[
+            ["משך כולל", "שעה אחת"],
+            ["הרכב החדר", "קבוצה אחת, 8 עד 12 משתתפים"],
+            ["הרכב הקבוצה", "בינאגפי מעורב, כל האגפים"],
+            ["כלי עבודה", "ארבעה תרחישים"],
+          ].map(([k, v]) => (
+            <div key={k} style={{ background: C.panel, border: "1px solid " + C.line, borderRadius: 14, padding: "16px 18px" }}>
+              <div style={{ fontSize: 12.5, color: C.sub, marginBottom: 6 }}>{k}</div>
+              <div style={{ fontSize: 17, fontWeight: 700, color: C.ink }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 28 }}>
+        <SectionLabel>מטרת הפעילות</SectionLabel>
+        <div style={{ background: C.panel, border: "1px solid " + C.line, borderRadius: 14, padding: "18px 20px" }}>
+          <p style={{ margin: 0, fontSize: 15.5, color: C.ink, lineHeight: 1.8 }}>
+            לאמן את הקבוצה לזהות באיזו רמת מינוף פעולה קיימת עובדת, להבין באיזה אופן היא פועלת,
+            ולחשוב כיצד אפשר לקדם אותה לרמה משפיעה יותר. זו פעילות הכנה לפני העבודה על הקנווס בפעילות 2:
+            כאן לומדים לקרוא פעולה דרך עדשת המינוף, ובפעילות 2 מייצרים פעולות חדשות.
+          </p>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 28 }}>
+        <SectionLabel>עקרונות יסוד</SectionLabel>
+        <div style={{ display: "grid", gap: 10 }}>
+          {[
+            "אין פעולות גרועות. ארבעת התרחישים מתארים פעולות אמיתיות וטובות.",
+            "לכל פעולה יש עומק מינוף, ואפשר לחבר אותה לרמות עמוקות יותר כדי שתשפיע יותר ולאורך זמן רב יותר.",
+            "מאבחנים את הרמה הנוכחית של הפעולה לפני שעוברים לדבר על שיפור.",
+            "השיפור אינו רק להוסיף עוד, אלא לשאול מה היה הופך את הפעולה לעמוקה יותר.",
+            "האווירה לומדת ולא מבקרת. הדיון אינו ביקורת על אגף אלא חשיבה משותפת על העמקה.",
+          ].map((t, i) => (
+            <div key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start", background: C.panel, border: "1px solid " + C.line, borderRadius: 12, padding: "14px 16px" }}>
+              <span style={{ flexShrink: 0, width: 26, height: 26, borderRadius: 8, background: C.accent, color: "#fff", display: "grid", placeItems: "center", fontWeight: 700, fontSize: 14 }}>{i + 1}</span>
+              <span style={{ fontSize: 15.5, color: C.ink, lineHeight: 1.6 }}>{t}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ background: "linear-gradient(135deg, " + C.accent + ", " + C.accentSoft + ")", borderRadius: 16, padding: "22px 24px", color: "#fff" }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, opacity: 0.85, marginBottom: 12 }}>מפת התרחישים, מהרדוד לעמוק</div>
+        <div style={{ display: "grid", gap: 10 }}>
+          {[
+            ["תרחיש 1, תגבור", "בעיקר פרמטרים"],
+            ["תרחיש 2, מייקרספייס", "נוגע בארגון עצמי"],
+            ["תרחיש 3, נוהל קליטה", "שינוי מבנה וכלל"],
+            ["תרחיש 4, איזון טיפול ורף", "שינוי תפיסה ותכלית"],
+          ].map(([a, b], i) => (
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, paddingBottom: 8, borderBottom: i < 3 ? "1px solid rgba(255,255,255,0.25)" : "none" }}>
+              <span style={{ fontSize: 16, fontWeight: 700 }}>{a}</span>
+              <span style={{ fontSize: 14, opacity: 0.92 }}>{b}</span>
+            </div>
+          ))}
+        </div>
+        <p style={{ margin: "16px 0 0", fontSize: 14.5, opacity: 0.92, lineHeight: 1.7 }}>
+          המסר שכדאי שיישאר: פעולה אינה טובה או רעה לפי הרמה שלה. כל פעולה יכולה להיות חזקה יותר כשמחברים אותה לרמות עמוקות יותר, וגם פעולה עמוקה זקוקה לעיגון ברמות המוחשיות כדי לא להישאר באוויר.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ---------- TAB: TIMER ----------
+function fmt(sec) {
+  const s = Math.max(0, Math.floor(sec));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return m + ":" + r.toString().padStart(2, "0");
+}
+
+function Timer() {
+  const segments = ROUNDS;
+  const [idx, setIdx] = useState(0);
+  const [remaining, setRemaining] = useState(segments[0].min * 60);
+  const [running, setRunning] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (running) {
+      ref.current = setInterval(() => {
+        setRemaining((r) => (r <= 1 ? 0 : r - 1));
+      }, 1000);
+    }
+    return () => clearInterval(ref.current);
+  }, [running]);
+
+  const seg = segments[idx];
+  const color = C.accent;
+  const total = seg.min * 60;
+  const pct = total > 0 ? (remaining / total) * 100 : 0;
+
+  function go(ni) {
+    setIdx(ni);
+    setRemaining(segments[ni].min * 60);
+    setRunning(false);
+  }
+
+  return (
+    <div>
+      <SectionLabel>טיימר שלב א, ארבעה סבבי תרחישים</SectionLabel>
+
+      <div style={{ background: C.panel, border: "1px solid " + C.line, borderRadius: 20, padding: "28px 24px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", insetInlineStart: 0, top: 0, bottom: 0, width: (100 - pct) + "%", background: color + "14", transition: "width 1s linear" }} />
+        <div style={{ position: "relative" }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: color, marginBottom: 4 }}>
+            סבב {idx + 1} מתוך {segments.length}: {seg.round}
+          </div>
+          <div style={{ fontSize: 84, fontWeight: 800, lineHeight: 1, color: remaining === 0 ? C.accent : C.ink, fontVariantNumeric: "tabular-nums", letterSpacing: -2, margin: "10px 0" }}>
+            {fmt(remaining)}
+          </div>
+          {remaining === 0 && (
+            <div style={{ fontSize: 18, fontWeight: 700, color: C.accent, marginBottom: 10 }}>עוברים לתרחיש הבא</div>
+          )}
+          <div style={{ fontSize: 13.5, color: C.sub, marginBottom: 18 }}>הקצאה: {seg.min} דקות</div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+            <button onClick={() => setRunning((r) => !r)} style={{ background: running ? "#fff" : color, color: running ? color : "#fff", border: "2px solid " + color, borderRadius: 12, padding: "12px 28px", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+              {running ? "השהה" : "התחל"}
+            </button>
+            <button onClick={() => go(idx)} style={ghostBtn}>אפס</button>
+            <button onClick={() => idx > 0 && go(idx - 1)} disabled={idx === 0} style={ghostBtn}>תרחיש קודם</button>
+            <button onClick={() => idx < segments.length - 1 && go(idx + 1)} disabled={idx === segments.length - 1} style={ghostBtn}>תרחיש הבא</button>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {segments.map((s, i) => (
+          <button key={i} onClick={() => go(i)} style={{ flex: "1 1 auto", background: i === idx ? C.accent : C.panel, color: i === idx ? "#fff" : C.sub, border: "1px solid " + (i === idx ? "transparent" : C.line), borderRadius: 10, padding: "8px 6px", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", minWidth: 110 }}>
+            {s.round}
+            <div style={{ fontSize: 11, opacity: 0.8 }}>{s.min} דקות</div>
+          </button>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 30 }}>
+        <SectionLabel>לוח הזמנים המלא</SectionLabel>
+        <div style={{ background: C.panel, border: "1px solid " + C.line, borderRadius: 14, overflow: "hidden" }}>
+          {SCHEDULE.map((s, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 18px", borderBottom: i < SCHEDULE.length - 1 ? "1px solid " + C.line : "none" }}>
+              <div style={{ flexShrink: 0, width: 52, fontSize: 18, fontWeight: 800, color: C.accent }}>{s.min} דק</div>
+              <div style={{ flex: 1, fontSize: 15, color: C.ink }}>{s.stage}</div>
+              <div style={{ fontSize: 13, color: C.sub }}>{s.cum} דק מצטבר</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginTop: 16, background: "#fff", border: "1px dashed " + C.accentSoft, borderRadius: 12, padding: "14px 18px", fontSize: 14, color: C.sub, lineHeight: 1.65 }}>
+        <strong style={{ color: C.accent }}>מבנה שלב א:</strong> ארבעה סבבים של עשר דקות, סבב לכל תרחיש.
+        בכל סבב מציגים תרחיש, מאבחנים באיזו רמה הוא עובד ובאיזה אופן, ודנים כיצד לקדם אותו לרמה משפיעה יותר.
+      </div>
+    </div>
+  );
+}
+
+const ghostBtn = {
+  background: "#fff",
+  color: C.sub,
+  border: "1px solid " + C.line,
+  borderRadius: 12,
+  padding: "12px 18px",
+  fontSize: 15,
+  fontWeight: 600,
+  cursor: "pointer",
+  fontFamily: "inherit",
+};
+
+// ---------- TAB: STAGES ----------
+function Stages() {
+  const blocks = [
+    {
+      tag: "פתיחה",
+      time: "15 דקות",
+      title: "סבב קשר והצגת הפעילות",
+      lead: "פותחים בסבב היכרות קצר שמחבר את המשתתפים, ואז הצגת הפעילות.",
+      qs: [
+        "סבב קשר: כל משתתף אומר שם, אגף, תפקיד, ואם אתם צריכים משהו, דברו איתי.",
+      ],
+      script: OPENING_SCRIPT,
+      role: [
+        "לנהל את סבב הקשר בקצב נעים, להזמין כל אחד למשפט קצר.",
+        "להציג את הפעילות בקצרה, בלי הרצאה תיאורטית.",
+        "להבהיר שהמטרה היא חיבור בין זיהוי נקודות מינוף לבין היומיום.",
+      ],
+    },
+    {
+      tag: "שלב א",
+      time: "40 דקות",
+      title: "ארבעה סבבי תרחישים",
+      lead: "ארבעה סבבים של עשר דקות, סבב לכל תרחיש. בכל סבב הקבוצה דנה בשלוש שאלות קבועות:",
+      qs: ROUND_QUESTIONS,
+      role: [
+        "לוודא שהקבוצה מאבחנת את הרמה הנוכחית לפני שהיא קופצת לשיפור.",
+        "לדאוג שהדיון על קידום הפעולה אינו נשאר בלהוסיף עוד, אלא עובר לשאלה מה היה הופך אותה לעמוקה יותר.",
+        "לשמור על אווירה לומדת ולא מבקרת. כשמתלבטים באיזו רמה הפעולה יושבת, להזכיר שאין תשובה אחת נכונה.",
+      ],
+    },
+    {
+      tag: "סיום",
+      time: "5 דקות",
+      title: "סבב סיכום קצר",
+      lead: "סבב מסכם שבו כל משתתף אומר במשפט מה התחדש לו בהקשר של נקודות מינוף.",
+      role: [
+        "להזמין כל משתתף למשפט קצר, בלי לחזור על כל הדיון.",
+        "לחבר לפעילות הבאה: בפעילות 2 נעבור מזיהוי פעולות קיימות לייצור פעולות חדשות על הקנווס.",
+      ],
+    },
+  ];
+
+  return (
+    <div style={{ display: "grid", gap: 18 }}>
+      {blocks.map((b, i) => (
+        <div key={i} style={{ background: C.panel, border: "1px solid " + C.line, borderRadius: 16, padding: "20px 22px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
+            <Pill color={C.accent}>{b.tag}</Pill>
+            <span style={{ fontSize: 13, color: C.sub, fontWeight: 600 }}>{b.time}</span>
+            <span style={{ fontSize: 19, fontWeight: 800, color: C.ink, marginInlineStart: 4 }}>{b.title}</span>
+          </div>
+
+          {b.lead && <p style={{ fontSize: 15, color: C.ink, lineHeight: 1.7, margin: "0 0 12px" }}>{b.lead}</p>}
+
+          {b.qs && (
+            <div style={{ display: "grid", gap: 8, marginBottom: 14 }}>
+              {b.qs.map((q, j) => (
+                <div key={j} style={{ background: "#fff", border: "1px solid " + C.line, borderRadius: 10, padding: "11px 14px", fontSize: 15, color: C.ink, lineHeight: 1.6 }}>{q}</div>
+              ))}
+            </div>
+          )}
+
+          {b.script && (
+            <div style={{ background: "#FFFDF8", border: "1px solid " + C.gold + "55", borderInlineStart: "4px solid " + C.gold, borderRadius: 10, padding: "14px 16px", marginBottom: 14 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.gold, marginBottom: 8, letterSpacing: 1 }}>תסריט פתיחה</div>
+              {b.script.map((line, j) => (
+                <p key={j} style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.75, margin: "0 0 8px" }}>{line}</p>
+              ))}
+            </div>
+          )}
+
+          <div>
+            <div style={{ fontSize: 12.5, fontWeight: 700, color: C.accent, marginBottom: 8 }}>תפקיד המנחה</div>
+            <ul style={{ margin: 0, paddingInlineStart: 18, display: "grid", gap: 6 }}>
+              {b.role.map((r, j) => (
+                <li key={j} style={{ fontSize: 14.5, color: C.sub, lineHeight: 1.6 }}>{r}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------- TAB: SCENARIO DETAIL ----------
+function ScenarioView({ sc }) {
+  const nowMeta = LEVEL_META[sc.levelTag] || { color: C.gold };
+  return (
+    <div>
+      <div style={{ background: "linear-gradient(135deg, " + C.ink + ", #1C2624)", borderRadius: 18, padding: "26px 26px", color: "#fff", marginBottom: 22 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: C.gold }}>תרחיש {sc.id}</span>
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: "#fff", background: "rgba(255,255,255,0.15)", borderRadius: 999, padding: "3px 12px" }}>{sc.tag}</span>
+        </div>
+        <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800, lineHeight: 1.2 }}>{sc.title}</h2>
+        <p style={{ fontSize: 15.5, lineHeight: 1.8, opacity: 0.92, marginTop: 14, marginBottom: 0 }}>{sc.story}</p>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14, marginBottom: 22 }}>
+        <div style={{ background: C.panel, border: "1px solid " + C.line, borderInlineStart: "4px solid " + nowMeta.color, borderRadius: 14, padding: "16px 18px" }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: nowMeta.color, marginBottom: 8, display: "flex", alignItems: "center", gap: 7 }}>
+            <span style={{ fontSize: 15 }}>{nowMeta.icon}</span> הרמה שבה הפעולה עובדת כיום
+          </div>
+          <p style={{ margin: 0, fontSize: 14.5, color: C.ink, lineHeight: 1.7 }}>{sc.levelNow}</p>
+        </div>
+        <div style={{ background: C.panel, border: "1px solid " + C.line, borderRadius: 14, padding: "16px 18px" }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.accentSoft, marginBottom: 8 }}>באיזה אופן היא פועלת</div>
+          <p style={{ margin: 0, fontSize: 14.5, color: C.ink, lineHeight: 1.7 }}>{sc.how}</p>
+        </div>
+      </div>
+
+      <SectionLabel>נקודות לדיון</SectionLabel>
+      <div style={{ display: "grid", gap: 8, marginBottom: 22 }}>
+        {sc.points.map((p, i) => (
+          <div key={i} style={{ background: C.panel, border: "1px solid " + C.line, borderRadius: 10, padding: "12px 16px", fontSize: 15, color: C.ink, lineHeight: 1.65 }}>{p}</div>
+        ))}
+      </div>
+
+      <SectionLabel>איך לקדם לרמה משפיעה יותר</SectionLabel>
+      <div style={{ display: "grid", gap: 10, marginBottom: 22 }}>
+        {sc.promote.map(([level, text], i) => {
+          const meta = LEVEL_META[level] || { color: C.gold, icon: "◆" };
+          return (
+            <div key={i} style={{ background: C.panel, border: "1px solid " + C.line, borderRadius: 12, padding: "14px 16px", display: "flex", gap: 12, alignItems: "flex-start" }}>
+              <span style={{ flexShrink: 0, display: "inline-flex", alignItems: "center", gap: 6, background: meta.color + "1A", color: meta.color, border: "1px solid " + meta.color + "44", borderRadius: 999, padding: "4px 12px", fontSize: 13, fontWeight: 700, whiteSpace: "nowrap" }}>
+                <span>{meta.icon}</span> {level}
+              </span>
+              <span style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.65 }}>{text}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ background: "#FFFDF8", border: "1px solid " + C.gold + "55", borderRadius: 14, padding: "18px 20px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 700, color: C.gold, marginBottom: 10, letterSpacing: 1 }}>
+          <span style={{ fontSize: 16 }}>✦</span> שאלות שאפשר לשאול
+        </div>
+        <ul style={{ margin: 0, paddingInlineStart: 18, display: "grid", gap: 8 }}>
+          {sc.questions.map((q, i) => (
+            <li key={i} style={{ fontSize: 15, color: C.ink, lineHeight: 1.65 }}>{q}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function Scenarios() {
+  const [sel, setSel] = useState(SCENARIOS[0].id);
+  const sc = SCENARIOS.find((t) => t.id === sel);
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 22 }}>
+        {SCENARIOS.map((t) => (
+          <button key={t.id} onClick={() => setSel(t.id)} style={{ flex: "1 1 auto", minWidth: 130, background: sel === t.id ? C.accent : C.panel, color: sel === t.id ? "#fff" : C.sub, border: "1px solid " + (sel === t.id ? "transparent" : C.line), borderRadius: 12, padding: "12px 10px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", lineHeight: 1.3 }}>
+            <div style={{ fontSize: 11, opacity: 0.7, marginBottom: 2 }}>תרחיש {t.id}</div>
+            {t.short}
+          </button>
+        ))}
+      </div>
+      <ScenarioView sc={sc} />
+    </div>
+  );
+}
+
+// ---------- TAB: CASES ----------
+function Cases() {
+  return (
+    <div>
+      <SectionLabel>מקרים ותגובות בזמן אמת</SectionLabel>
+      <p style={{ fontSize: 14.5, color: C.sub, lineHeight: 1.65, marginTop: 0, marginBottom: 20 }}>
+        מצבים שעשויים לעלות בדיון, עם תגובה מוצעת לכל אחד. אלה כלים לשמירה על עומק ועל אווירה לומדת.
+      </p>
+      <div style={{ display: "grid", gap: 14 }}>
+        {CASES.map((c) => (
+          <div key={c.n} style={{ background: C.panel, border: "1px solid " + C.line, borderRadius: 14, padding: "18px 20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+              <span style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 9, background: C.accent, color: "#fff", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 15 }}>{c.n}</span>
+              <span style={{ fontSize: 17, fontWeight: 800, color: C.ink }}>{c.title}</span>
+            </div>
+            <p style={{ fontSize: 14.5, color: C.sub, lineHeight: 1.65, margin: "0 0 12px" }}>{c.sit}</p>
+            <div style={{ background: "#fff", borderInlineStart: "4px solid " + C.accentSoft, border: "1px solid " + C.line, borderRadius: 10, padding: "13px 16px" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.accentSoft, marginBottom: 6 }}>תגובה מוצעת</div>
+              <p style={{ margin: 0, fontSize: 15, color: C.ink, lineHeight: 1.7 }}>{c.resp}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------- TAB: LEVELS ----------
+function Levels() {
+  return (
+    <div>
+      <SectionLabel>נספח: דגשים מקצועיים לפי רמות</SectionLabel>
+      <p style={{ fontSize: 14.5, color: C.sub, lineHeight: 1.65, marginTop: 0, marginBottom: 20 }}>
+        רקע למנחה על ארבע רמות המינוף. אין צורך ללמד זאת, אלא להיעזר בו אם עולות שאלות, וכדי לעזור לקבוצה לשייך פעולות לרמה הנכונה.
+      </p>
+      <div style={{ display: "grid", gap: 14 }}>
+        {Object.entries(LEVEL_META).map(([level, meta], i) => (
+          <div key={level} style={{ background: C.panel, border: "1px solid " + C.line, borderInlineStart: "5px solid " + meta.color, borderRadius: 14, padding: "18px 20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+              <span style={{ width: 36, height: 36, borderRadius: 10, background: meta.color + "1A", color: meta.color, display: "grid", placeItems: "center", fontSize: 20 }}>{meta.icon}</span>
+              <div>
+                <div style={{ fontSize: 11, color: C.sub }}>רמה {i + 1}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: meta.color }}>{level}</div>
+              </div>
+            </div>
+            <p style={{ margin: 0, fontSize: 15, color: C.ink, lineHeight: 1.75 }}>{meta.note}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 20, background: "linear-gradient(135deg, " + C.ink + ", #1C2624)", borderRadius: 14, padding: "20px 22px", color: "#fff" }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.gold, marginBottom: 8 }}>עיקרון על</div>
+        <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.8, opacity: 0.95 }}>
+          ככל שיורדים מהפרמטרים אל התכלית והכוונה, השינוי קשה יותר ולא תמיד נוח, אך הוא מזיז יותר מערכת ולאורך זמן רב יותר. אין רמה אחת נכונה. המטרה לראות שאנו נוטים להתרכז בפרמטרים, ולהתאמן לגעת גם בעמוק.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ===================== APP =====================
+
+const TABS = [
+  { id: "overview", label: "סקירה", icon: "◷" },
+  { id: "timer", label: "זמנים וטיימר", icon: "⏱" },
+  { id: "stages", label: "שלבי הסדנה", icon: "▤" },
+  { id: "scenarios", label: "התרחישים", icon: "◎" },
+  { id: "cases", label: "מקרים ותגובות", icon: "✦" },
+  { id: "levels", label: "נספח רמות", icon: "◆" },
+];
+
+function App() {
+  const [tab, setTab] = useState("overview");
+
+  return (
+    <div dir="rtl" style={{ fontFamily: "'Heebo', 'Assistant', system-ui, sans-serif", background: C.bg, minHeight: "100vh", color: C.ink }}>
+      <style>{`
+        * { box-sizing: border-box; }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 10px; }
+      `}</style>
+
+      <header style={{ background: "linear-gradient(135deg, " + C.accent + ", #4E807C)", color: "#fff", padding: "26px 22px 20px" }}>
+        <div style={{ maxWidth: 860, margin: "0 auto" }}>
+          <div style={{ fontSize: 12.5, fontWeight: 700, letterSpacing: 3, opacity: 0.85, marginBottom: 8 }}>מדריך מנחה · יום למידה שלישי</div>
+          <h1 style={{ margin: 0, fontFamily: "'Frank Ruhl Libre', serif", fontSize: 38, fontWeight: 900, lineHeight: 1.1 }}>פעילות 1 · באיזו רמה זה עובד</h1>
+          <p style={{ margin: "10px 0 0", fontSize: 15, opacity: 0.9, maxWidth: 620, lineHeight: 1.6 }}>
+            אבחון תרחישים וקידום מינוף. מדריך הפעלה למנחה, כולל זמנים, תסריט, תרחישים ומקרים מהשטח.
+          </p>
+        </div>
+      </header>
+
+      <nav style={{ position: "sticky", top: 0, zIndex: 10, background: C.bg + "F2", backdropFilter: "blur(8px)", borderBottom: "1px solid " + C.line }}>
+        <div style={{ maxWidth: 860, margin: "0 auto", display: "flex", gap: 4, padding: "8px 14px", overflowX: "auto" }}>
+          {TABS.map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: "0 0 auto", display: "flex", alignItems: "center", gap: 7, background: tab === t.id ? C.ink : "transparent", color: tab === t.id ? "#fff" : C.sub, border: "none", borderRadius: 10, padding: "10px 16px", fontSize: 14.5, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", transition: "all 0.15s" }}>
+              <span style={{ fontSize: 15, opacity: 0.85 }}>{t.icon}</span>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      <main style={{ maxWidth: 860, margin: "0 auto", padding: "28px 18px 80px" }}>
+        {tab === "overview" && <Overview />}
+        {tab === "timer" && <Timer />}
+        {tab === "stages" && <Stages />}
+        {tab === "scenarios" && <Scenarios />}
+        {tab === "cases" && <Cases />}
+        {tab === "levels" && <Levels />}
+      </main>
+    </div>
+  );
+}
+
+const container = document.getElementById('root');
+const root = ReactDOM.createRoot(container);
+root.render(<App />);
+</script>
+</body>
+</html>
