@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מדריך מנחה · מפגש 3 · נקודות מינוף</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+<script>
+  (function () {
+    var _warn = console.warn;
+    console.warn = function () {
+      var f = arguments[0];
+      if (typeof f === "string" && f.indexOf("in-browser Babel transformer") !== -1) return;
+      return _warn.apply(console, arguments);
+    };
+  })();
+</script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #EEF2F1; }
+  * { box-sizing: border-box; }
+  #root { min-height: 100vh; }
+  .app-loading { min-height: 100vh; display: grid; place-items: center; font-family: 'Heebo', system-ui, sans-serif; color: #3A6B68; font-size: 18px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="root"><div class="app-loading" dir="rtl">טוען את מדריך המנחה…</div></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+// ============ palette ============
+const C = {
+  bg: "#EEF2F1", panel: "#FAFCFB", ink: "#26312F", inkDk: "#1C2624",
+  sub: "#5E6E6B", line: "#D8E2DF", accent: "#3A6B68", accentSoft: "#5A8F8B", gold: "#A8895A",
+};
+const BF = "'Heebo', sans-serif";
+const HF = "'Frank Ruhl Libre', serif";
+
+const LEVELS = {
+  "פרמטרים": { color: "#A8895A", icon: "▰",
+    note: "זוהי הרמה הנגישה ביותר לשיח קבוצתי, ולכן גם זו שאליה נוטים לפנות ראשונים. בדרך כלל מדובר בשינויים נקודתיים בכמויות, במספרים או בהקצאות, כגון תקציב, שעות, תקנים, יחס, או זמינות משאבים. זוהי נקודת פתיחה חשובה, אך לרוב היא משפיעה על המערכת בעוצמה מוגבלת בלבד.",
+    q: "אילו שינויים כמותיים יכולים לסייע, ומה מגביל את השפעתם כאשר המבנה, הכללים או התכלית נותרו ללא שינוי?" },
+  "לולאות משוב": { color: "#3A6B68", icon: "↻",
+    note: "כאן עוסקים באופן שבו רכיב אחד במערכת משפיע על רכיב אחר וחוזר ומשפיע עליו בחזרה. זיהוי לולאות משוב מאפשר להבין מה מחזק תהליכים, מה מייצב אותם, ומה עשוי לבלום אותם או להעצימם לאורך זמן.",
+    q: "אילו קשרי חיזוק או ויסות פועלים כאן, ומה עשוי לחזק תהליך רצוי או למנוע התדרדרות מוקדמת?" },
+  "מבנה ועיצוב": { color: "#5E7A92", icon: "▢",
+    note: "רמה זו עוסקת בארכיטקטורה של המערכת: כללי פעולה, זרימות מידע, חלוקת סמכויות, תהליכי תיאום, ויכולת של המערכת להשתנות ולהתארגן. מדוז, ובהמשך גם המסגרות שהתבססו עליה, מצביעות על כך ששינוי ברמת המבנה והעיצוב עמוק יותר משינוי בפרמטרים בלבד, מפני שהוא משפיע על אופן הפעולה של המערכת עצמה.",
+    q: "אילו כללים, ערוצי מידע או חלוקות אחריות יוצרים תנאים לפעולה מיטיבה, ואילו מהם מגבילים אותה?" },
+  "תכלית וכוונה": { color: "#7E7196", icon: "◆",
+    note: "זוהי הרמה העמוקה ביותר מבין ארבע הרמות. כאן שואלים על מטרות, ערכים, הנחות יסוד ותפיסת התכלית של המערכת. לפי מדוז, שינוי בתכלית או בפרדיגמה משנה לא רק את אופן הפעולה של המערכת, אלא גם את האופן שבו שאר הרמות מוגדרות ומתפרשות.",
+    q: "אילו מטרות, ערכים או הנחות יסוד מנחים את הפעולה, ומה היה משתנה אילו הגדרנו אותם מחדש?" },
+};
+
+// ============ shared UI ============
+function Label({ children }) {
+  return <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: C.accent, marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
+    <span style={{ width: 22, height: 2, background: C.accent }} />{children}</div>;
+}
+function Card({ children, accent, style }) {
+  return <div style={{ position: "relative", background: C.panel, border: "1px solid " + C.line, borderRadius: 14, padding: "16px 18px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", ...style }}>
+    {accent && <div style={{ position: "absolute", insetInlineEnd: 0, top: 0, bottom: 0, width: 5, background: accent, borderRadius: "0 14px 14px 0" }} />}
+    {children}</div>;
+}
+
+function fmt(s) { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ":" + (s % 60).toString().padStart(2, "0"); }
+
+// ============ Inline timer (compact, sits inside screens) ============
+function InlineTimer({ segments, label }) {
+  const [idx, setIdx] = useState(0);
+  const [rem, setRem] = useState(segments[0].min * 60);
+  const [run, setRun] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (run) ref.current = setInterval(() => setRem(r => r <= 1 ? 0 : r - 1), 1000);
+    return () => clearInterval(ref.current);
+  }, [run]);
+  const seg = segments[idx];
+  const col = seg.color || C.accent;
+  function go(n) { setIdx(n); setRem(segments[n].min * 60); setRun(false); }
+  return (
+    <Card accent={col} style={{ marginBottom: 22 }}>
+      <Label>{label}</Label>
+      <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
+        <div style={{ fontSize: 46, fontWeight: 800, color: rem === 0 ? C.accent : C.ink, fontVariantNumeric: "tabular-nums", letterSpacing: -1, minWidth: 110, textAlign: "center" }}>{fmt(rem)}</div>
+        <div style={{ flex: 1, minWidth: 180 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: col }}>{seg.name}</div>
+          <div style={{ fontSize: 12.5, color: C.sub }}>{rem === 0 ? "הזמן הסתיים, אפשר להתקדם" : "הקצאה: " + seg.min + " דקות"}</div>
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button onClick={() => setRun(r => !r)} style={{ background: run ? "#fff" : col, color: run ? col : "#fff", border: "2px solid " + col, borderRadius: 10, padding: "9px 20px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: BF }}>{run ? "השהה" : "התחל"}</button>
+          <button onClick={() => go(idx)} style={ghost}>אפס</button>
+          {idx > 0 && <button onClick={() => go(idx - 1)} style={ghost}>הקודם</button>}
+          {idx < segments.length - 1 && <button onClick={() => go(idx + 1)} style={ghost}>הבא</button>}
+        </div>
+      </div>
+      {segments.length > 1 && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 12 }}>
+          {segments.map((s, i) => (
+            <button key={i} onClick={() => go(i)} style={{ flex: "1 1 auto", minWidth: 70, background: i === idx ? (s.color || C.accent) : "#fff", color: i === idx ? "#fff" : C.sub, border: "1px solid " + (i === idx ? "transparent" : C.line), borderRadius: 8, padding: "6px 4px", fontSize: 11.5, fontWeight: 600, cursor: "pointer", fontFamily: BF }}>
+              {s.name}<div style={{ fontSize: 10, opacity: 0.8 }}>{s.min} דק</div></button>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+const ghost = { background: "#fff", color: C.sub, border: "1px solid " + C.line, borderRadius: 10, padding: "9px 14px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: BF };
+
+// ============ TAB: GENERAL ============
+function General() {
+  const paras = [
+    "המפגש השלישי הוא נקודת המפנה בתהליך הבין-אגפי של מינהל כפרי הנוער. אם שני המפגשים הראשונים עסקו בהבנת מהי מוביליות חברתית וכיצד היא מתעצבת לאורך מסלול חייהם של ילדות וילדים בכפרי הנוער, הרי שמפגש שלוש מבקש להעביר את צוותי הפיקוח מהבנה תיאורטית לחשיבה על התערבות, היכן בדיוק במערכת כדאי לפעול כדי שהמאמץ יתורגם לאימפקט אמיתי. בלב המפגש עומד מודל נקודות המינוף של דונלה מדוז, המבחין בין רמות התערבות שונות: מפרמטרים ומספרים (מינוף נמוך, קל לשינוי), דרך לולאות משוב ומבנים וכללים, ועד לתכלית, לכוונה ולמסרים הסמויים של המערכת (מינוף גבוה, קשה להשפעה). השאלה המנחה אינה רק מה אפשר לעשות, אלא מה יביא לשינוי עמוק ובר-קיימא, ובמיוחד כיצד פעולות שצוותי הפיקוח כבר מבצעים ביום-יום יכולות לעלות מדרגה ברמת המינוף שלהן.",
+    "ההקשר הבין-אגפי הוא העיקר. כפר הנוער הוא מכלול: פדגוגיה, פנימייה, קליטה ואגף פסיכו-סוציאלי פוגשים את אותו ילד מזוויות שונות, וכל אגף מחזק במיקרו שלו תחומי תוכן מסוימים. אך התובנה שעלתה בחדות בדיון ההכנה, ובמיוחד מצד הפיקוח הפנימייתי, היא שהשינוי הגדול ביותר נוצר דווקא במאקרו: בתקשורת טובה יותר, בסנכרון ובחשיבה משותפת בין האגפים. רבים מהאזורים האפורים שבהם אובד הרצף סביב התלמיד נמצאים בדיוק בתפר שבין המרחבים, במקום שאף אגף אינו רואה לבדו. לכן המפגש בנוי כך שהדיון יתקיים בקבוצות בין-אגפיות, וכל תרחיש או תמה ייבחנו בו-זמנית דרך עיניהם של כל בעלי התפקידים סביב השולחן.",
+    "מבחינת מיקומו בתהליך הכולל, מפגש שלוש הוא התשתית למפגש הרביעי, כתיבת תוכניות העבודה. הרעיונות, הפעולות ונקודות המינוף שיזוהו כאן הם חומר הגלם שכל קבוצה תבחר ממנו ותעבד אותו לכדי תוכנית קונקרטית. שתי הסדנאות שבמפגש משרתות מטרה זו בהדרגה: הסדנה הראשונה מבססת את ההבנה המושגית, זיהוי רמת המינוף של תרחישים נתונים והעמקתם; והשנייה, לב המפגש, מעבירה את המשתתפים לחשיבת פעולות ממשית ברמה האישית, האגפית והבין-אגפית, תוך התלבשות על מנגנונים קיימים ולא המצאת פרויקטים חדשים.",
+  ];
+  return (
+    <div>
+      <Label>נקודות מינוף</Label>
+      <h2 style={{ margin: "0 0 16px", fontFamily: HF, fontSize: 30, fontWeight: 800, color: C.ink }}>מפגש 3, נקודות מינוף</h2>
+      {paras.map((p, i) => (
+        <p key={i} style={{ fontSize: 15.5, lineHeight: 1.85, color: C.ink, margin: "0 0 16px", textAlign: "justify" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ============ TAB: AGENDA ============
+function Agenda() {
+  const rows = [
+    ["08:30-09:00", "התכנסות", false],
+    ["09:00-09:30", "פתיחה", false],
+    ["09:30-10:15", "הרצאה של תומר, ראש תחום חדשנות", true],
+    ["10:15-10:30", "הפסקה", false],
+    ["10:30-11:30", "סדנה 1, במליאה בארבעה חדרים", true],
+    ["11:30-12:15", "סיור בווינגייט", false],
+    ["12:15-13:00", "ארוחת צהריים", false],
+    ["13:00-14:30", "סדנה 2, בארבעה חדרים", true],
+    ["14:30-15:00", "סיכום וצידה לדרך", false],
+  ];
+  return (
+    <div>
+      <Label>מהלך היום</Label>
+      <h2 style={{ margin: "0 0 18px", fontFamily: HF, fontSize: 28, fontWeight: 800, color: C.ink }}>סדר יום</h2>
+      <div style={{ display: "grid", gap: 8 }}>
+        {rows.map((r, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 16, background: r[2] ? C.panel : "#fff", border: "1px solid " + C.line, borderInlineStart: r[2] ? "4px solid " + C.accent : "4px solid " + C.line, borderRadius: 12, padding: "13px 18px" }}>
+            <div style={{ flexShrink: 0, fontSize: 15, fontWeight: 700, color: C.accent, fontVariantNumeric: "tabular-nums", minWidth: 96, direction: "ltr", textAlign: "right" }}>{r[0]}</div>
+            <div style={{ flex: 1, fontSize: 15.5, fontWeight: r[2] ? 700 : 500, color: C.ink }}>{r[1]}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============ TAB: WORKSHOP 1 ============
+const Q_LEVEL = "לאיזו מארבע רמות המינוף שייכת הפעולה, ובאיזה אופן היא משנה את המצב?";
+const SCENARIOS = [
+  { n: 1, tag: "אגף פדגוגי", title: "שעות תגבור באוריינות שפה", level: "פרמטרים",
+    story: "האגף הפדגוגי זיהה שתלמידים מרקע מוחלש מגיעים עם פערים באוריינות שפה, והחליט להוסיף שתי שעות תגבור שבועיות בשפה לתלמידים אלה. תוספת משאב מהירה וממוקדת.",
+    qs: [Q_LEVEL, "מה היה הופך את השעות מסגירת פער לפתיחת מסלול?", "אם נסתכל קדימה שלוש שנים, מה ייפתח בפני התלמיד אם השעות יצליחו במלואן?"],
+    answer: "רמה: פרמטרים. הפעולה מוסיפה משאב כמותי, שעות והקצאה, ולכן היא מהירה וקלה למדידה אך השפעתה לרוב מקומית. היא מתחזקת אם מחברים אותה לכלל או לנוהל (מבנה), למשל מסלול המשך לתלמיד שמתקדם, ולמטרה ברורה של פתיחת אפשרויות ולא רק סגירת פער (תכלית). מבט קדימה עוזר לבדוק אם השעות פותחות דלת או רק מוסיפות עומס." },
+  { n: 2, tag: "אגף פנימיות", title: "מרחב מייקרספייס וחוגים טכנולוגיים", level: "מבנה ועיצוב",
+    story: "הפנימייה פיתחה מרחב מייקרספייס והציעה בו חוגים טכנולוגיים אחר הצהריים ובחופשות. יוזמה מהשטח שנוגעת בארגון עצמי, ולא רק בתוספת משאב.",
+    qs: [Q_LEVEL, "מה צריך לקרות כדי שהמרחב יהפוך ממקום פנאי למקפצה למסלול?", "אם נסתכל קדימה, אילו תלמידים ירוויחו מהמרחב לאורך זמן, ומי אולי יישאר בחוץ?"],
+    answer: "רמה: בין פרמטרים למבנה ועיצוב, עם נגיעה בארגון עצמי. עצם היוזמה מהשטח היא ביטוי לארגון עצמי, רמה עמוקה יחסית. הפעולה מתחזקת כשהמרחב מחובר למסלול, למשל גשר אל מגמה טכנולוגית או חשיפה לאקדמיה (מבנה), וכשמוגדר שהוא חלק מהמשימה ולא רק פנאי (תכלית). מבט קדימה עוזר לוודא שהמרחב מגיע גם למי שזקוק לו, ולא רק לחזקים." },
+  { n: 3, tag: "אגף קליטה והשמה", title: "קליטה לפי פוטנציאל וחוזקות", level: "מבנה ועיצוב",
+    story: "כפרי נוער קולטים ישירות את הילדות והילדים. לאחרונה הוחלט באגף הקליטה לשקול לעדכן את נוהל הקליטה כך שיתבסס על פוטנציאל וחוזקות של התלמיד והתאמה למסלול מקדם מוביליות.",
+    qs: [Q_LEVEL, "מאיפה יגיע המידע על הפוטנציאל של התלמיד, ובאיזו איכות?", "אם נסתכל קדימה, כיצד שינוי כזה בשיבוץ עשוי להשפיע על מסלול החיים של התלמיד?"],
+    answer: "רמה: מבנה ועיצוב, ונוגע גם בתכלית וכוונה. זהו שינוי בכלל ההחלטה עצמו, ולכן הוא משפיע על שורה שלמה של שיבוצים עתידיים, מינוף עמוק יחסית. הפעולה מתחזקת כשהיא נשענת על מידע אמין שמגיע גם מהאגף הפדגוגי והפסיכו סוציאלי, וכשהיא מבטאת מטרה משותפת לכל האגפים ולא כלל פנימי בלבד (תכלית). מבט קדימה עוזר לראות את הקשר בין השיבוץ הנכון למסלול שנפתח." },
+  { n: 4, tag: "אגף פסיכו סוציאלי", title: "איזון בין טיפול להצבת רף ציפיות", level: "תכלית וכוונה",
+    story: "האגף הפסיכו סוציאלי שילב בפרוטוקול עיקרון של החזקה לצד הנעה: לצד התמיכה הרגשית, הצבת רף ציפיות שיכול לקדם את התלמיד. שינוי בתפיסת תפקיד הצוות.",
+    qs: [Q_LEVEL, "כיצד הופכים אמונה כזו להתנהגות יומיומית של הצוות?", "אם נסתכל קדימה, איך נדע שהצבנו רף מתוך תמיכה ולא הכבדנו על התלמיד?"],
+    answer: "רמה: תכלית וכוונה, ונוגע במבנה ועיצוב דרך הפרוטוקול. זו הרמה העמוקה ביותר, כי היא משנה את תפיסת תפקיד הצוות עצמה. כאן האתגר הפוך מהתרחישים האחרים: הפעולה עמוקה אך קשה ליישום, ולכן היא זקוקה לעיגון ברמות המוחשיות, כמו כלים בפרוטוקול (מבנה) וזמן והדרכה לצוות (פרמטרים). מבט קדימה עוזר לאזן בין הנעה לבין תמיכה." },
+];
+
+function Workshop1() {
+  const sched = [
+    ["פתיחה ומשחק היכרות", "מליאה", "10 דקות"],
+    ["הסבר הפעילות וחלוקת דף הרמות", "מליאה", "5 דקות"],
+    ["ארבעה סבבי תרחישים", "מליאה", "40 דקות"],
+    ["סיכום קצר", "מליאה", "5 דקות"],
+  ];
+  return (
+    <div>
+      <Label>סדנה ראשונה</Label>
+      <h2 style={{ margin: "0 0 16px", fontFamily: HF, fontSize: 28, fontWeight: 800, color: C.ink }}>נקודות מינוף בפעולה</h2>
+
+      {/* schedule table */}
+      <div style={{ border: "1px solid " + C.line, borderRadius: 12, overflow: "hidden", marginBottom: 22 }}>
+        <div style={{ display: "flex", background: C.accent, color: "#fff", fontSize: 12.5, fontWeight: 700 }}>
+          <div style={{ flex: 1, padding: "10px 16px" }}>שלב</div>
+          <div style={{ width: 120, padding: "10px 16px" }}>מסגרת</div>
+          <div style={{ width: 90, padding: "10px 16px" }}>זמן</div>
+        </div>
+        {sched.map((r, i) => (
+          <div key={i} style={{ display: "flex", background: i % 2 ? C.panel : "#fff", fontSize: 14, color: C.ink, borderTop: "1px solid " + C.line }}>
+            <div style={{ flex: 1, padding: "10px 16px" }}>{r[0]}</div>
+            <div style={{ width: 120, padding: "10px 16px", color: C.accentSoft, fontWeight: 600 }}>{r[1]}</div>
+            <div style={{ width: 90, padding: "10px 16px", color: C.sub }}>{r[2]}</div>
+          </div>
+        ))}
+      </div>
+
+      <InlineTimer label="טיימר, 10 דקות לכל תרחיש" segments={[
+        { name: "תרחיש 1", min: 10, color: LEVELS["פרמטרים"].color },
+        { name: "תרחיש 2", min: 10, color: LEVELS["מבנה ועיצוב"].color },
+        { name: "תרחיש 3", min: 10, color: LEVELS["מבנה ועיצוב"].color },
+        { name: "תרחיש 4", min: 10, color: LEVELS["תכלית וכוונה"].color },
+      ]} />
+
+      {/* opening + flow */}
+      <Card accent={C.gold} style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.gold, marginBottom: 8 }}>תסריט פתיחה</div>
+        <p style={{ margin: "0 0 8px", fontSize: 14.5, color: C.ink, lineHeight: 1.75 }}>שלום לכולם, ושמחים שאתם כאן. בשני המפגשים הקודמים הבנו יחד מהי מוביליות חברתית וכיצד היא נבנית לאורך חייהם של הילדות והילדים שלנו. היום נעשה צעד אחד קדימה, ונתבונן בפעולות שאנחנו כבר עושים ביום יום, וננסה להבין כמה עומק ואיזה כוח באמת יש בהן.</p>
+        <p style={{ margin: 0, fontSize: 14.5, color: C.ink, lineHeight: 1.75 }}>נעשה זאת דרך ארבעה תרחישים מהשטח. בכל פעם נקרא תרחיש אחד ונדבר עליו יחד, ואין כאן תשובות נכונות או שגויות, אלא חשיבה משותפת. הדבר הכי חשוב לנו הוא לשמוע את כל הקולות סביב השולחן, כי לכל אגף יש זווית שמאירה משהו שהאחרים אולי לא רואים.</p>
+      </Card>
+      <Card style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.accent, marginBottom: 8 }}>משחק הפתיחה</div>
+        <p style={{ margin: "0 0 8px", fontSize: 14.5, color: C.ink, lineHeight: 1.75 }}>לפני שנצלול לתוכן, נעשה סבב קצר שיעזור לנו להכיר ולהתחבר. כל אחד ואחת יאמרו את השם, האגף והתפקיד, ויוסיפו משפט אחד שמתחיל במילים "אם אתם צריכים... דברו איתי".</p>
+        <p style={{ margin: 0, fontSize: 14.5, color: C.ink, lineHeight: 1.75 }}>זה יכול להיות משהו מקצועי, למשל תחום שאתם מבינים בו או יכולים לעזור בו, וזה יכול להיות גם משהו אישי וקטן. המטרה היא פשוט להזכיר לעצמנו שאנחנו כאן אחד בשביל השני, וזו בדיוק רוח העבודה הבין-אגפית שתלווה אותנו היום.</p>
+      </Card>
+      <Card style={{ marginBottom: 22 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.accent, marginBottom: 8 }}>מהלך פעילות התרחישים</div>
+        <p style={{ margin: "0 0 8px", fontSize: 14.5, color: C.ink, lineHeight: 1.75 }}>מטרת התרחישים היא להעמיק בקשר שבין פעולה לבין המינוף הפוטנציאלי שלה, כלומר לא רק מה הפעולה עושה, אלא כמה עומק יש בה וכיצד אפשר לחבר אותה לרמות משפיעות יותר.</p>
+        <p style={{ margin: 0, fontSize: 14.5, color: C.ink, lineHeight: 1.75 }}>מחלקים למשתתפים את דף ההסבר של ארבע רמות המינוף, ככלי עזר לאורך הדיון. בכל סבב מקריאים תרחיש אחד ודנים בו לאור השאלות המנחות, כולל שאלה שמסתכלת קדימה ובוחנת את הפוטנציאל האמיתי של הפעולה. כעשר דקות לכל תרחיש, ארבעה תרחישים. אדם אחד בכל קבוצה מתעד את עיקרי הדיון, כדי שהרעיונות לא יאבדו.</p>
+      </Card>
+
+      {/* scenarios one after another */}
+      <Label>ארבעת התרחישים והשאלות המנחות</Label>
+      <div style={{ display: "grid", gap: 14 }}>
+        {SCENARIOS.map(s => {
+          const m = LEVELS[s.level];
+          return (
+            <Card key={s.n} accent={C.accent}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8, flexWrap: "wrap" }}>
+                <span style={{ width: 30, height: 30, borderRadius: 9, background: C.accent, color: "#fff", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 15, flexShrink: 0 }}>{s.n}</span>
+                <span style={{ fontSize: 12, color: C.sub, fontWeight: 600 }}>{s.tag}</span>
+                <span style={{ fontSize: 17, fontWeight: 800, color: C.ink }}>{s.title}</span>
+              </div>
+              <p style={{ margin: "0 0 10px", fontSize: 14, color: C.ink, lineHeight: 1.7 }}>{s.story}</p>
+              <div style={{ background: "#fff", border: "1px solid " + C.line, borderRadius: 10, padding: "12px 14px", marginBottom: 10 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: C.accent, marginBottom: 6 }}>שאלות מנחות</div>
+                <ul style={{ margin: 0, paddingInlineStart: 18, display: "grid", gap: 6 }}>
+                  {s.qs.map((q, i) => <li key={i} style={{ fontSize: 14, color: C.ink, lineHeight: 1.6 }}>{q}</li>)}
+                </ul>
+              </div>
+              <div style={{ background: m.color + "12", border: "1px solid " + m.color + "33", borderRadius: 10, padding: "12px 14px" }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: m.color, marginBottom: 6 }}>מפת תשובות למנחה, עוגנים לדיון</div>
+                <p style={{ margin: 0, fontSize: 13.5, color: C.ink, lineHeight: 1.7 }}>{s.answer}</p>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ============ TAB: WORKSHOP 2 ============
+const ACT_Q = "אילו פעולות, אישי, אגפי ובינאגפי, אפשר לקדם בהקשר של מוביליות חברתית?";
+const THEMES = [
+  { id: 1, short: "סיכון ופוטנציאל", title: "עדשת סיכון ועדשת פוטנציאל",
+    story: "אותו תלמיד יכול להיראות בשתי דרכים שונות. דרך עדשה אחת אנחנו שואלים איך לשמור, לייצב ולמנוע התדרדרות, ודרך עדשה אחרת אנחנו שואלים איך לפתח את מה שכבר קיים בו. שתיהן לגיטימיות, אך העדשה שדרכה מסתכלים אינה כתובה בנוהל, ויש לה השפעה שקטה על החלטות רבות. מחקר המוביליות הסובייקטיבית מצביע על כך שגישת צמיחה עשויה למתן את הקשר בין רקע נמוך להישגים.",
+    levels: {
+      "פרמטרים": ["אילו משאבים תומכים גם בפיתוח פוטנציאל ולא רק בייצוב?", "אילו הקצאות יכול הפיקוח לקדם מול מנהלי בתי הספר והפנימיות?", ACT_Q],
+      "לולאות משוב": ["אילו מנגנונים יזהו ויחזקו כישרון מוקדם?", "כיצד הצלחה של תלמיד יכולה להוביל לעוד הצלחה, ואיזה תהליך יעודד הפיקוח?", ACT_Q],
+      "מבנה ועיצוב": ["אילו נהלים או זרימות מידע יסייעו לראות גם חוזקות?", "מה הפיקוח יכול להניע כאן?", ACT_Q],
+      "תכלית וכוונה": ["עד כמה ההגדרה של תלמיד שאפשר להצליח איתו גלויה ומשותפת?", "מה תפקיד הפיקוח בעיצובה?", ACT_Q],
+    } },
+  { id: 2, short: "אזורים אפורים", title: "אזורים אפורים, צמתים וקשרים",
+    story: "לאורך השנים יש צמתים שבהם מתקבלות החלטות מעצבות, כמו בחירת מגמה, הצטרפות לחוג, קבלת תפקיד, וקשרים שמתפתחים או נשברים, וכן מעברים בין מרחבים: בית ספר, פנימייה, בית והמרחב הבלתי פורמלי. בכל אחד מהם כל גורם מחזיק תמונה רחבה על החלק שלו, ולא תמיד את התפר עצמו. כך נוצרים אזורים אפורים שבהם קל לאבד את הרצף סביב התלמיד, ובהם החלטה אחת עשויה להשפיע על המסלול כולו.",
+    levels: {
+      "פרמטרים": ["אילו משאבים מחזקים רציפות וליווי בצמתים, ולאילו מעברים נכון לתת דגש?", "אילו הקצאות יכול הפיקוח לקדם?", ACT_Q],
+      "לולאות משוב": ["אילו סימנים יעידו מוקדם על קשר שנחלש או החלטה שמצמצמת אפשרויות?", "איזה תהליך יעודד הפיקוח כדי להגיב?", ACT_Q],
+      "מבנה ועיצוב": ["אילו נהלים או זרימות מידע יחברו בין הגורמים והמרחבים סביב המעבר?", "מה הפיקוח יכול להניע?", ACT_Q],
+      "תכלית וכוונה": ["עד כמה אנו תופסים את הצמתים והקשרים כרגעים מכוננים למוביליות?", "מה תפקיד הפיקוח בקידום תפיסה זו?", ACT_Q],
+    } },
+  { id: 3, short: "מריטוקרטיה", title: "מריטוקרטיה, חסמים מבניים והון תרבותי",
+    story: "מריטוקרטיה היא התפיסה שלפיה מי שמתאמץ מצליח. מחקרים מראים שילדים נוטים לאמץ הסברים אישיים להצלחה ולכישלון ועם פחות תשומת לב לחסמים מבניים. כאן עוזרת החשיבה של בורדייה: המערכת מעריכה לעיתים מבלי לשים לב הון תרבותי שילד מביא מהבית כמו שפה ובִטחון מול סמכות והון חברתי כמו רשת קשרים ומנטורים. מי שמגיע בלעדיהם עלול להתקשות בניווט במערכת גם אם הוא מוכשר. כפר הנוער ובתי הספר יכולים לבנות הון זה במכוון.",
+    levels: {
+      "פרמטרים": ["אילו משאבים יסייעו לבנות הון תרבותי וחברתי, כמו חשיפה, מנטורים ושפה אקדמית?", "אילו הקצאות יכול הפיקוח לקדם?", ACT_Q],
+      "לולאות משוב": ["אילו דפוסים חוזרים נכון לזהות?", "כיצד אפשר לבנות לולאה חיובית שבה בוגר שהצליח חוזר ומחזק אחרים?", ACT_Q],
+      "מבנה ועיצוב": ["אילו נהלים או יוזמות מהשטח יבנו הון חברתי?", "מה הפיקוח יכול להניע?", ACT_Q],
+      "תכלית וכוונה": ["עד כמה הצוות מבחין בין כישלון אישי לבין שעתוק מבני?", "מה תפקיד הפיקוח בקידום שיח כזה?", ACT_Q],
+    } },
+  { id: 4, short: "השלם והחלקים", title: "השלם גדול מסכום חלקיו",
+    story: "המינהל נשען על ארבעה תחומי ליבה, שכל אחד רואה היבט אחר בחיי התלמיד: הפדגוגי את הלמידה, הפסיכו סוציאלי את הרגש, הפנימייה את חיי היום יום, והקליטה את ההתאמה למסגרת. כשהעבודה נפרדת התמונה חלקית, וכשהיא משותפת, עם שפה, מטרה ומידע משותפים, מתהווה הבנה שלמה יותר של מסלול החיים. החיבור הבין-אגפי מאפשר לראות את התלמיד בשלמותו ולעצב עבורו מסלול שמתייחס לכל הממדים יחד.",
+    levels: {
+      "פרמטרים": ["אילו מסגרות זמן או משאבים מאפשרים עבודה בין-אגפית סדירה?", "אילו מסגרות יכול הפיקוח לקדם?", ACT_Q],
+      "לולאות משוב": ["אילו מנגנונים יחברו את האגפים כשמשהו נופל בין הכיסאות?", "כיצד שיתוף הצלחות יחזק את שיתוף הפעולה?", ACT_Q],
+      "מבנה ועיצוב": ["אילו צורות של מידע משותף או נהלים יתמכו במבט משותף בהחלטות מפתח?", "מה הפיקוח יכול להניע?", ACT_Q],
+      "תכלית וכוונה": ["עד כמה לארבעת האגפים יש מטרת על משותפת סביב מוביליות?", "מה תפקיד הפיקוח בגיבושה?", ACT_Q],
+    } },
+  { id: 5, short: "אינדיקטורים", title: "אינדיקטורים למוביליות",
+    story: "מה שנמדד מקבל את עיקר תשומת הלב והמשאבים. כיום מקובל למדוד זכאות בגיל 18, אך מוביליות מתבטאת בעיקר בהמשך הדרך, בצבא, במסלול הלימודים, בהכשרה ובשוק העבודה. מדידה של תוצאות ארוכות טווח נדרשת כדי לראות את התמונה המלאה. מחקרים מצביעים על כך שתחום הלימוד הוא גורם משמעותי מאוד בתוצאות הכלכליות העתידיות, ולעיתים אף יותר מסוג המוסד. אינדיקטור טוב משמש כלי כיוונון של המערכת קדימה.",
+    levels: {
+      "פרמטרים": ["אילו נתונים פשוטים על מסלול הבוגר כדאי להתחיל לאסוף?", "אילו צעדים יכול הפיקוח לקדם?", ACT_Q],
+      "לולאות משוב": ["כיצד נתוני בוגרים יכולים לחזור למערכת ולהזין החלטות?", "איזה תהליך יעודד הפיקוח?", ACT_Q],
+      "מבנה ועיצוב": ["מי צריך לראות את הנתונים ובאיזו תדירות, כדי שהמידע יהפוך לפעולה?", "איזו יוזמה מקומית יכולה לצמוח מכאן?", ACT_Q],
+      "תכלית וכוונה": ["עד כמה נגדיר יחד הצלחה דרך מסלול חיים, לצד הזכאות?", "מה תפקיד הפיקוח בגיבוש הגדרה זו?", ACT_Q],
+    } },
+];
+
+function Workshop2() {
+  const [theme, setTheme] = useState(1);
+  const t = THEMES.find(x => x.id === theme);
+  const sched = [
+    ["פתיחה והסבר הקנווס", "מליאה", "10 דקות"],
+    ["העמקה בתימה", "קבוצות", "12 דקות"],
+    ["מילוי הקנווס בארבע הרמות", "קבוצות", "50 דקות"],
+    ["הצגה הדדית ומשוב", "מליאה", "18 דקות"],
+  ];
+  return (
+    <div>
+      <Label>סדנה שנייה</Label>
+      <h2 style={{ margin: "0 0 16px", fontFamily: HF, fontSize: 28, fontWeight: 800, color: C.ink }}>מהתימה אל הקנווס</h2>
+
+      <div style={{ border: "1px solid " + C.line, borderRadius: 12, overflow: "hidden", marginBottom: 22 }}>
+        <div style={{ display: "flex", background: C.accent, color: "#fff", fontSize: 12.5, fontWeight: 700 }}>
+          <div style={{ flex: 1, padding: "10px 16px" }}>שלב</div>
+          <div style={{ width: 120, padding: "10px 16px" }}>מסגרת</div>
+          <div style={{ width: 90, padding: "10px 16px" }}>זמן</div>
+        </div>
+        {sched.map((r, i) => (
+          <div key={i} style={{ display: "flex", background: i % 2 ? C.panel : "#fff", fontSize: 14, color: C.ink, borderTop: "1px solid " + C.line }}>
+            <div style={{ flex: 1, padding: "10px 16px" }}>{r[0]}</div>
+            <div style={{ width: 120, padding: "10px 16px", color: C.accentSoft, fontWeight: 600 }}>{r[1]}</div>
+            <div style={{ width: 90, padding: "10px 16px", color: C.sub }}>{r[2]}</div>
+          </div>
+        ))}
+      </div>
+
+      <InlineTimer label="טיימר, מילוי הקנווס רמה אחר רמה" segments={[
+        { name: "פרמטרים", min: 10, color: LEVELS["פרמטרים"].color },
+        { name: "לולאות משוב", min: 10, color: LEVELS["לולאות משוב"].color },
+        { name: "מבנה ועיצוב", min: 12, color: LEVELS["מבנה ועיצוב"].color },
+        { name: "תכלית וכוונה", min: 12, color: LEVELS["תכלית וכוונה"].color },
+        { name: "סימון רעיונות", min: 6, color: C.gold },
+      ]} />
+
+      {/* canvas explanation */}
+      <Card accent={C.accent} style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.accent, marginBottom: 8 }}>איך עובדים על הקנווס</div>
+        <p style={{ margin: "0 0 8px", fontSize: 14.5, color: C.ink, lineHeight: 1.7 }}>הקבוצה מקבלת תימה אחת ועובדת עליה דרך ארבע הרמות. בכל רמה רושמים הצעות לפעולה בשלוש זוויות: אישי (מה המפקח יכול לעשות), אגפי (מה האגף יכול להוביל) ובינאגפי (מה דורש חיבור בין אגפים). ממלאים רמה שלמה ואז עוברים לבאה.</p>
+        <div style={{ display: "grid", gap: 6 }}>
+          {[
+            "חשוב שיבואו לידי ביטוי דוגמאות מארבעת האגפים, ולא רק מאגף אחד.",
+            "מדובר בהצעות לפעולה, לא בהכרעות. זה שלב של זריעת רעיונות.",
+            "מתלבשים על מנגנונים קיימים, ולא ממציאים פרויקטים חדשים.",
+          ].map((x, i) => (
+            <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 13.5, color: C.ink, lineHeight: 1.6 }}>
+              <span style={{ color: C.gold, fontWeight: 800 }}>•</span>{x}</div>
+          ))}
+        </div>
+      </Card>
+      <Card accent={C.gold} style={{ marginBottom: 22 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.gold, marginBottom: 6 }}>דוגמה למילוי תא בקנווס</div>
+        <p style={{ margin: "0 0 4px", fontSize: 14, color: C.ink, lineHeight: 1.7 }}><strong>תימה:</strong> אינדיקטורים למוביליות. <strong>רמה:</strong> מבנה ועיצוב. <strong>זווית:</strong> בינאגפי.</p>
+        <p style={{ margin: 0, fontSize: 14, color: C.ink, lineHeight: 1.7 }}><strong>הצעה לפעולה:</strong> להיעזר בתוכנית הבוגרים הקיימת "יש לך כתובת" כך שנתוני הבוגרים ייאספו פעם בשנה וייסקרו יחד בפורום של ארבעת האגפים, כדי שהמידע יהפוך להחלטה משותפת.</p>
+      </Card>
+
+      {/* theme selector */}
+      <Label>התימות והשאלות בארבע הרמות</Label>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+        {THEMES.map(x => (
+          <button key={x.id} onClick={() => setTheme(x.id)} style={{ flex: "1 1 auto", minWidth: 110, background: theme === x.id ? C.accent : "#fff", color: theme === x.id ? "#fff" : C.sub, border: "1px solid " + (theme === x.id ? "transparent" : C.line), borderRadius: 10, padding: "9px 8px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: BF, lineHeight: 1.25 }}>
+            <div style={{ fontSize: 10.5, opacity: 0.7 }}>תימה {x.id}</div>{x.short}</button>
+        ))}
+      </div>
+
+      <Card style={{ marginBottom: 14 }}>
+        <h3 style={{ margin: "0 0 10px", fontSize: 19, fontWeight: 800, color: C.ink }}>{t.title}</h3>
+        <p style={{ margin: 0, fontSize: 14.5, color: C.ink, lineHeight: 1.75 }}>{t.story}</p>
+      </Card>
+      <div style={{ display: "grid", gap: 12 }}>
+        {Object.entries(t.levels).map(([lvl, qs]) => {
+          const m = LEVELS[lvl];
+          return (
+            <div key={lvl} style={{ border: "1px solid " + C.line, borderRadius: 12, overflow: "hidden" }}>
+              <div style={{ background: m.color + "18", borderBottom: "1px solid " + m.color + "33", padding: "9px 16px", display: "flex", alignItems: "center", gap: 9 }}>
+                <span style={{ fontSize: 15, color: m.color }}>{m.icon}</span>
+                <span style={{ fontSize: 15.5, fontWeight: 700, color: m.color }}>{lvl}</span>
+              </div>
+              <ul style={{ margin: 0, padding: "12px 16px", paddingInlineStart: 30, display: "grid", gap: 7 }}>
+                {qs.map((q, i) => <li key={i} style={{ fontSize: 14, color: C.ink, lineHeight: 1.6 }}>{q}</li>)}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ============ TAB: LEVELS ============
+function LevelsTab() {
+  return (
+    <div>
+      <Label>רמות מינוף, ארבע הרמות</Label>
+      <p style={{ fontSize: 14.5, color: C.sub, lineHeight: 1.6, margin: "0 0 18px" }}>רקע למנחה. אין צורך ללמד זאת, אלא להיעזר בו אם עולות שאלות וכדי לשייך פעולות לרמה הנכונה.</p>
+      <div style={{ display: "grid", gap: 12 }}>
+        {Object.entries(LEVELS).map(([lvl, m], i) => (
+          <Card key={lvl} accent={m.color}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+              <span style={{ width: 34, height: 34, borderRadius: 10, background: m.color + "1A", color: m.color, display: "grid", placeItems: "center", fontSize: 18 }}>{m.icon}</span>
+              <div><div style={{ fontSize: 11, color: C.sub }}>רמה {i + 1}</div>
+                <div style={{ fontSize: 17, fontWeight: 800, color: m.color }}>{lvl}</div></div>
+            </div>
+            <p style={{ margin: 0, fontSize: 14.5, color: C.ink, lineHeight: 1.7 }}>{m.note}</p>
+            {m.q && (
+              <div style={{ marginTop: 10, background: m.color + "12", border: "1px solid " + m.color + "33", borderRadius: 10, padding: "11px 14px" }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: m.color, marginBottom: 4 }}>שאלת מנחה</div>
+                <p style={{ margin: 0, fontSize: 14, color: C.ink, lineHeight: 1.65 }}>{m.q}</p>
+              </div>
+            )}
+          </Card>
+        ))}
+      </div>
+      <div style={{ marginTop: 16, background: "linear-gradient(135deg, " + C.ink + ", " + C.inkDk + ")", borderRadius: 14, padding: "18px 20px", color: "#fff" }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.gold, marginBottom: 8 }}>עיקרון על</div>
+        <p style={{ margin: 0, fontSize: 15, lineHeight: 1.75, opacity: 0.95 }}>ככל שיורדים מהפרמטרים אל התכלית והכוונה, השינוי קשה יותר ולא תמיד נוח, אך הוא מזיז יותר מערכת ולאורך זמן רב יותר. אין רמה אחת נכונה. המטרה לראות שאנו נוטים להתרכז בפרמטרים, ולהזמין להעמיק גם ברמות המינוף האחרות.</p>
+      </div>
+    </div>
+  );
+}
+
+// ============ APP ============
+const TABS = [
+  { id: "general", label: "כללי" },
+  { id: "agenda", label: "סדר יום" },
+  { id: "w1", label: "סדנה 1" },
+  { id: "w2", label: "סדנה 2" },
+  { id: "levels", label: "רמות מינוף" },
+];
+function App() {
+  const [tab, setTab] = useState("general");
+  return (
+    <div dir="rtl" style={{ fontFamily: BF, background: C.bg, minHeight: "100vh", color: C.ink }}>
+      <style>{`button:disabled{opacity:.4;cursor:not-allowed} ::-webkit-scrollbar{width:9px;height:9px} ::-webkit-scrollbar-thumb{background:${C.line};border-radius:9px}`}</style>
+      <header style={{ background: "linear-gradient(135deg, " + C.accent + ", #4E807C)", color: "#fff", padding: "22px 22px 18px" }}>
+        <div style={{ maxWidth: 820, margin: "0 auto" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 3, opacity: 0.85, marginBottom: 6 }}>מדריך מנחה</div>
+          <h1 style={{ margin: 0, fontFamily: HF, fontSize: 32, fontWeight: 900 }}>מו"פ בינאגפי: מפגש 3 בנושא נקודות מינוף ומוביליות חברתית</h1>
+        </div>
+      </header>
+      <nav style={{ position: "sticky", top: 0, zIndex: 10, background: C.bg + "F2", backdropFilter: "blur(8px)", borderBottom: "1px solid " + C.line }}>
+        <div style={{ maxWidth: 820, margin: "0 auto", display: "flex", gap: 4, padding: "8px 14px", overflowX: "auto" }}>
+          {TABS.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: "0 0 auto", background: tab === t.id ? C.ink : "transparent", color: tab === t.id ? "#fff" : C.sub, border: "none", borderRadius: 10, padding: "10px 16px", fontSize: 14.5, fontWeight: 700, cursor: "pointer", fontFamily: BF, whiteSpace: "nowrap" }}>{t.label}</button>
+          ))}
+        </div>
+      </nav>
+      <main style={{ maxWidth: 820, margin: "0 auto", padding: "26px 18px 70px" }}>
+        {tab === "general" && <General />}
+        {tab === "agenda" && <Agenda />}
+        {tab === "w1" && <Workshop1 />}
+        {tab === "w2" && <Workshop2 />}
+        {tab === "levels" && <LevelsTab />}
+      </main>
+    </div>
+  );
+}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
